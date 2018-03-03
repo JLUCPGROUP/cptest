@@ -13,9 +13,10 @@ int main() {
 	builder.GenerateHModel(hm);
 	//QVar v(hm->vars[0]);
 	//cout << v.size(0) << endl;
-	lMaxRPC_bit_rm s(hm);
+	MAC3bit s(hm);
 	//auto ps = s.propagate(s.vars, 0);
-	s.solve(Heuristic::Var::VRH_DOM_WDEG_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
+	//s.solve(Heuristic::Var::VRH_DOM_WDEG_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
+	s.solve(Heuristic::Var::VRH_DOM_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
 	cout << "time = " << s.statistics().solve_time << endl;
 	cout << "positive = " << s.statistics().num_positive << endl;
 	cout << "negative = " << s.statistics().num_negative << endl;

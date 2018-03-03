@@ -61,7 +61,7 @@ public:
 	 *	-<em>false</em> fail
 	 *	-<em>true</em> succeed
 	 */
-	void GenerateXModelFromXml(XModel * xm);
+	void GenerateXModelFromXml(XModel * model);
 	void GenerateHModel(HModel* hm);
 
 	//GenerateXModelFromXml

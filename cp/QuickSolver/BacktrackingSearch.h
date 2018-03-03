@@ -13,10 +13,10 @@ public:
 	SearchStatistics statistics() const;
 	virtual PropagationState propagate(vector<QVar*>& x_evt, const int level) = 0;
 
-	virtual SearchStatistics solve(const Heuristic::Var varh, const Heuristic::Val valh, const int time_limit);
-	QVal select_QVal(const Heuristic::Var varh, const Heuristic::Val valh, const int level);
-	QVar* select_QVar(const Heuristic::Var varh, const int level);
-	int select_value(QVar* v, const Heuristic::Val valh, const int level);
+	virtual SearchStatistics solve(const Heuristic::Var varh, const Heuristic::Val valh, const int time_limits);
+	QVal select_QVal(const Heuristic::Var varh, const Heuristic::Val valh, const int p);
+	QVar* select_QVar(const Heuristic::Var varh, const int p);
+	int select_value(QVar* v, const Heuristic::Val valh, const int p);
 	vector<QVar*> vars;
 	vector<QTab*> tabs;
 	vector<u64> con_stamp;
@@ -68,7 +68,7 @@ public:
 	~MAC3bit() {};
 	PropagationState propagate(vector<QVar*>& x_evt, const int level) override;
 	bool revise(QTab* c, QVar* v, const int level);
-	bool seek_support(QTab* c, QVar* v, const int a, const int level);
+	bool seek_support(QTab* c, QVar* v, const int a, const int p);
 protected:
 	vector<vector<u64>> bitSup_;
 };
@@ -79,7 +79,7 @@ public:
 	~MAC3rm() {};
 	PropagationState propagate(vector<QVar*>& x_evt, const int level) override;
 	bool revise(QTab* c, QVar* v, const int level);
-	bool seek_support(QTab* c, QVar* v, const int a, const int level);
+	bool seek_support(QTab* c, QVar* v, const int a, const int p);
 protected:
 	vector<vector<int>> res_;
 };
@@ -88,12 +88,12 @@ class lMaxRPC_bit_rm :public BacktrackingSearch {
 public:
 	lMaxRPC_bit_rm(HModel *h);
 	~lMaxRPC_bit_rm() {};
-	PropagationState propagate(vector<QVar*>& x_evt, const int level) override;
-	bool search_pc_sup(QVar* const var, int i, QVar* var1, const int p);
-	bool is_consistent(QVar* const var, int i, QVar* var1, int b, const int p);
+	PropagationState propagate(vector<QVar*>& x_evt, const int p) override;
+	bool search_pc_sup(QVar* const i, int a, QVar* j, const int p);
+	bool is_consistent(QVar* const i, int a, QVar* j, int b, const int p);
 	bool search_pc_wit(QVar* const i, const int a, QVar* j, int b, const int p);
-	bool have_no_PC_support(QVar* x, const int a, QVar* y, const int p);
-	bool have_PC_wit(QVar* x, const int a, QVar* y, const int b, QVar* z, const int p);
+	bool have_no_PC_support(QVar* i, const int a, QVar* j, const int p);
+	bool have_PC_wit(QVar* i, const int a, QVar* j, const int b, QVar* k, const int p);
 protected:
 	vector<vector<QTab*>> neibor_matrix;
 	vector<vector<vector<QVar*>>> pc_nei_;

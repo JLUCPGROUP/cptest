@@ -167,7 +167,7 @@ public:
 	bool SAT(vector<int>& t);
 	bool SAT_STD(vector<int>& t);
 	void Show();
-	void GetTuple(int idx, vector<int>& t, vector<int>& t_idx);
+	void GetTuple(int idx, vector<int>& src_t, vector<int>& std_t);
 	bool sat(vector<int>& t);
 private:
 	//临时变量
@@ -197,7 +197,7 @@ public:
 	int max_arity() const { return mas_; };
 	void show();
 	int regist(string exp_name, function<int(vector<int>&)>);
-	static int calculate(vector<int> &stack, vector<int>& params_len);
+	static int calculate(vector<int> & expr, vector<int>& params_len);
 	vector<HTab*> solution_check(vector<int>& sol);
 	bool have_same_scope() const { return have_same_scope_; }
 private:
