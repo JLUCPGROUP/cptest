@@ -182,7 +182,7 @@ namespace  cp {
 			for (auto v : vars)
 				if (!I_.assigned(v)) {
 					int dom_deg;
-					if (neighborhood[v].empty())
+					if (neighborhood[v].size() == 0)
 						dom_deg = -1;
 					else
 						dom_deg = v->size(p) / neighborhood[v].size();
@@ -319,9 +319,9 @@ namespace  cp {
 		for (QTab* c : tabs) {
 			for (auto t : c->tuples) {
 				const int index[] = { get_QConVal_index(c, 0, t[0]), get_QConVal_index(c, 1, t[1]) };
-				const BitIndex idx[] = { GetBitIdx(t[0]), GetBitIdx(t[1]) };
-				bitSup_[index[0]][idx[1].x] |= U64_MASK1[idx[1].y];
-				bitSup_[index[1]][idx[0].x] |= U64_MASK1[idx[0].y];
+				const tuple<int, int> idx[] = { GetBitIdx(t[0]), GetBitIdx(t[1]) };
+				bitSup_[index[0]][get<0>(idx[1])] |= U64_MASK1[get<1>(idx[1])];
+				bitSup_[index[1]][get<0>(idx[0])] |= U64_MASK1[get<1>(idx[0])];
 			}
 		}
 	}
@@ -507,9 +507,9 @@ namespace  cp {
 		for (QTab* c : tabs) {
 			for (auto t : c->tuples) {
 				const int index[] = { get_QConVal_index(c, 0, t[0]), get_QConVal_index(c, 1, t[1]) };
-				const BitIndex idx[] = { GetBitIdx(t[0]), GetBitIdx(t[1]) };
-				bitSup_[index[0]][idx[1].x] |= U64_MASK1[idx[1].y];
-				bitSup_[index[1]][idx[0].x] |= U64_MASK1[idx[0].y];
+				const tuple<int, int> idx[] = { GetBitIdx(t[0]), GetBitIdx(t[1]) };
+				bitSup_[index[0]][get<0>(idx[1])] |= U64_MASK1[get<1>(idx[1])];
+				bitSup_[index[1]][get<0>(idx[0])] |= U64_MASK1[get<1>(idx[0])];
 			}
 		}
 	}
@@ -616,10 +616,10 @@ namespace  cp {
 	bool lMaxRPC_bit_rm::is_consistent(QVar* const i, const int a, QVar* j, const int b, const int p) {
 		const auto c = neibor_matrix[i->id][j->id];
 		const int idx[] = { get_QConVal_index(c, i, a) , get_QConVal_index(c, j, b) };
-		const BitIndex index[] = { GetBitIdx(a),GetBitIdx(b) };
-		if (!(bitSup_[idx[0]][index[1].x] & j->bitDom(p)[index[1].x]))
+		const tuple<int, int> index[] = { GetBitIdx(a),GetBitIdx(b) };
+		if (!(bitSup_[idx[0]][get<0>(index[1])] & j->bitDom(p)[get<0>(index[1])]))
 			return false;
-		if (!(bitSup_[idx[1]][index[0].x] & j->bitDom(p)[index[0].x]))
+		if (!(bitSup_[idx[1]][get<0>(index[0])] & j->bitDom(p)[get<0>(index[0])]))
 			return false;
 		return true;
 	}
@@ -651,15 +651,15 @@ namespace  cp {
 
 		for (int b = j->head(p); b != Limits::INDEX_OVERFLOW; j->next_value(b, p)) {
 			int PCWitness = true;
-			const auto b_idx = GetBitIdx(b);
-			if (bitSup_[idx1][b_idx.x] | U64_MASK1[b_idx.y]) {
+			auto b_idx = GetBitIdx(b);
+			if (bitSup_[idx1][get<0>(b_idx)] | U64_MASK1[get<1>(b_idx)]) {
 				for (auto k : pc_nei_[i->id][j->id]) {
 					if (!have_PC_wit(i, a, j, b, k, p)) {
 						PCWitness = false;
 						break;
 					}
 				}
-				if (PCWitness) {
+				if (PCWitness != false) {
 					const auto idx2 = get_QConVal_index(c, j, b);
 					last_pc[idx1] = b;
 					last_pc[idx2] = a;

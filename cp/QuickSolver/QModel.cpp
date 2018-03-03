@@ -23,7 +23,7 @@ namespace cp {
 
 	void QVar::remove_value(const int a, const int p) {
 		const auto index = GetBitIdx(a);
-		bit_doms_[p][index.x] &= U64_MASK0[index.y];
+		bit_doms_[p][get<0>(index)] &= U64_MASK0[get<1>(index)];
 		--size_[p];
 	}
 
@@ -31,7 +31,7 @@ namespace cp {
 		const auto index = GetBitIdx(a);
 		for (auto& v : bit_doms_[p])
 			v = 0;
-		bit_doms_[p][index.x] |= U64_MASK1[index.y];
+		bit_doms_[p][get<0>(index)] |= U64_MASK1[get<1>(index)];
 		size_[p] = 1;
 	}
 
@@ -41,11 +41,11 @@ namespace cp {
 
 	int QVar::next(const int a, const int p) const {
 		const auto index = GetBitIdx(a);
-		const u64 b = (bit_doms_[p][index.x] >> index.y) >> 1;
+		const u64 b = (bit_doms_[p][get<0>(index)] >> get<1>(index)) >> 1;
 		if (b)
 			return a + FirstOne(b) + 1;
 
-		for (size_t i = index.x + 1; i < num_bit; ++i)
+		for (size_t i = get<0>(index) + 1; i < num_bit; ++i)
 			if (bit_doms_[p][i])
 				return GetValue(i, FirstOne(bit_doms_[p][i]));
 
@@ -54,14 +54,14 @@ namespace cp {
 
 	void QVar::next_value(int& a, const int p) {
 		auto index = GetBitIdx(a++);
-		const u64 b = (bit_doms_[p][index.x] >> index.y) >> 1;
+		const u64 b = (bit_doms_[p][get<0>(index)] >> get<1>(index)) >> 1;
 
 		if (b) {
 			a = a + FirstOne(b);
 			return;
 		}
 
-		for (size_t i = index.x + 1; i < num_bit; ++i)
+		for (size_t i = get<0>(index) + 1; i < num_bit; ++i)
 			if (bit_doms_[p][i]) {
 				a = GetValue(i, FirstOne(bit_doms_[p][i]));
 				return;
@@ -74,7 +74,7 @@ namespace cp {
 		if (a == Limits::INDEX_OVERFLOW)
 			return false;
 		const auto index = GetBitIdx(a);
-		return bit_doms_[p][index.x] & U64_MASK1[index.y];
+		return bit_doms_[p][get<0>(index)] & U64_MASK1[get<1>(index)];
 	}
 
 	int QVar::head(const int p) const {
@@ -141,7 +141,7 @@ namespace cp {
 	//
 	//void QVar::remove_value(const int a, const int p) {
 	//	const auto index = GetBitIdx(a);
-	//	bit_doms_[p][get<0>(index)] &= U64_MASK0[index.y];
+	//	bit_doms_[p][get<0>(index)] &= U64_MASK0[get<1>(index)];
 	//	--size_[p];
 	//}
 	//
@@ -149,7 +149,7 @@ namespace cp {
 	//	const auto index = GetBitIdx(a);
 	//	for (auto& v : bit_doms_[p])
 	//		v = 0;
-	//	bit_doms_[p][get<0>(index)] |= U64_MASK1[index.y];
+	//	bit_doms_[p][get<0>(index)] |= U64_MASK1[get<1>(index)];
 	//	size_[p] = 1;
 	//}
 	//
@@ -159,7 +159,7 @@ namespace cp {
 	//
 	//int QVar::next(const int a, const int p) const {
 	//	const auto index = GetBitIdx(a);
-	//	const u64 b = (bit_doms_[p][get<0>(index)] >> index.y) >> 1;
+	//	const u64 b = (bit_doms_[p][get<0>(index)] >> get<1>(index)) >> 1;
 	//	if (b)
 	//		return a + FirstOne(b) + 1;
 	//
@@ -172,7 +172,7 @@ namespace cp {
 	//
 	//void QVar::next_value(int& a, const int p) {
 	//	auto index = GetBitIdx(a++);
-	//	const u64 b = (bit_doms_[p][get<0>(index)] >> index.y) >> 1;
+	//	const u64 b = (bit_doms_[p][get<0>(index)] >> get<1>(index)) >> 1;
 	//
 	//	if (b) {
 	//		a = a + FirstOne(b) + 1;
@@ -192,7 +192,7 @@ namespace cp {
 	//	if (a == Limits::INDEX_OVERFLOW)
 	//		return false;
 	//	const auto index = GetBitIdx(a);
-	//	return bit_doms_[p][get<0>(index)] & U64_MASK1[index.y];
+	//	return bit_doms_[p][get<0>(index)] & U64_MASK1[get<1>(index)];
 	//}
 	//
 	//int QVar::head(const int p) const {
@@ -237,7 +237,7 @@ namespace cp {
 	//	//assigned_[dest] = assigned_[src];
 	//	size_[dest] = size_[src];
 	//}
-		//////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
 	const QVal& QVal::operator=(const QVal& rhs) {
 		v = rhs.v;
 		a = rhs.a;

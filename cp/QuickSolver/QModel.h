@@ -165,19 +165,19 @@ namespace cp {
 		int y;
 	};
 
-	inline BitIndex GetBitIdx(const int idx) {
-		tuple<int, int> a;
-		get<0>(a) = idx >> DIV_BIT;
-		get<1>(a) = idx & MOD_MASK;
-		return BitIndex { idx >> DIV_BIT, idx & MOD_MASK };
-	}
-
-	//inline tuple<int, int> GetBitIdx(const int idx) {
+	//inline BitIndex GetBitIdx(const int idx) {
 	//	tuple<int, int> a;
 	//	get<0>(a) = idx >> DIV_BIT;
 	//	get<1>(a) = idx & MOD_MASK;
-	//	return a;
+	//	return BitIndex { idx >> DIV_BIT, idx & MOD_MASK };
 	//}
+
+	inline tuple<int, int> GetBitIdx(const int idx) {
+		tuple<int, int> a;
+		get<0>(a) = idx >> DIV_BIT;
+		get<1>(a) = idx & MOD_MASK;
+		return a;
+	}
 	inline int GetValue(const int i, const int j) {
 		return  (i << DIV_BIT) + j;
 	}
