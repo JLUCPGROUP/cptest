@@ -280,7 +280,7 @@ namespace cp {
 		del();
 	}
 
-	void vars_heap::push(QVar* v, const int p) {
+	void vars_heap::push(QVar &  v, const int p) {
 		insert(v, p);
 	}
 
@@ -300,11 +300,11 @@ namespace cp {
 		delete[] position_;
 	}
 
-	void vars_heap::insert(QVar* v, const int p) {
-		if (position_[v->id] >= 0)
-			filter_up(position_[v->id], p);
+	void vars_heap::insert(QVar  &  v, const int p) {
+		if (position_[v.id] >= 0)
+			filter_up(position_[v.id], p);
 		else {
-			vs_[cur_size_] = v;
+			vs_[cur_size_] = &v;
 			filter_up(cur_size_, p);
 			cur_size_++;
 		}
@@ -324,8 +324,8 @@ namespace cp {
 		cur_size_ = 0;
 	}
 
-	bool vars_heap::compare(QVar* a, QVar* b, const int p) {
-		return a->size(p) < b->size(p);
+	bool vars_heap::compare(QVar const & a, QVar const & b, const int p) {
+		return a.size(p) < b.size(p);
 	}
 
 	void vars_heap::filter_up(const int start, const int p) const {
@@ -333,7 +333,7 @@ namespace cp {
 		int i = (j - 1) / 2;
 		QVar* v = vs_[j];
 		while (j > 0) {
-			if (compare(vs_[j], v, p)) {
+			if (compare(*(vs_[j]), *v, p)) {
 				break;
 			}
 			else {
@@ -353,10 +353,10 @@ namespace cp {
 		QVar* v = vs_[i];
 
 		while (j <= finish) {
-			if (j < finish && compare(vs_[j + 1], vs_[j], p))
+			if (j < finish && compare(*(vs_[j + 1]), *(vs_[j]), p))
 				j++;
 
-			if (compare(v, vs_[j], p))
+			if (compare(*v, *(vs_[j]), p))
 				break;
 			else {
 				vs_[i] = vs_[j];
@@ -432,6 +432,13 @@ namespace cp {
 	int QTab::index(QVar* v) const {
 		for (int i = scope.size() - 1; i >= 0; --i)
 			if (scope[i] == v)
+				return i;
+		return Limits::INDEX_OVERFLOW;
+	}
+
+	int QTab::index(QVar& v) const {
+		for (int i = scope.size() - 1; i >= 0; --i)
+			if (scope[i]->id == v.id)
 				return i;
 		return Limits::INDEX_OVERFLOW;
 	}

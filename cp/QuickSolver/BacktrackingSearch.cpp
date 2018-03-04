@@ -91,10 +91,16 @@ namespace  cp {
 			tt[i] = vars[t->scope[i]->id];
 		return tt;
 	}
-	void BacktrackingSearch::insert(QVar* v, const int p) {
+	//void BacktrackingSearch::insert(QVar* v, const int p) {
+	//	q_.push(v, p);
+	//	++time;
+	//	var_stamp[v->id] = time;
+	//}
+
+	void BacktrackingSearch::insert(QVar& v, const int p) {
 		q_.push(v, p);
 		++time;
-		var_stamp[v->id] = time;
+		var_stamp[v.id] = time;
 	}
 
 	SearchStatistics BacktrackingSearch::statistics() const {
@@ -244,75 +250,75 @@ namespace  cp {
 
 
 	///////////////////////////////////////////////////////////////
-	MAC3::MAC3(HModel* h) :BacktrackingSearch(h) {}
-	PropagationState MAC3::propagate(vector<QVar*>& x_evt, const int level) {
-		q_.clear();
-		ps_.level = level;
-		ps_.num_delete = 0;
+	//MAC3::MAC3(HModel* h) :BacktrackingSearch(h) {}
+	//PropagationState MAC3::propagate(vector<QVar*>& x_evt, const int level) {
+	//	q_.clear();
+	//	ps_.level = level;
+	//	ps_.num_delete = 0;
 
-		for (auto v : x_evt)
-			insert(v, level);
-		while (!q_.empty()) {
-			QVar* x = q_.pop(level);
-			//q_.pop_back();
-			for (QTab* c : subscription[x]) {
-				if (var_stamp[x->id] > con_stamp[c->id]) {
-					for (auto y : c->scope) {
-						if (!I_.assigned(y)) {
-							bool aa = false;
-							for (auto z : c->scope)
-								if ((z != x) && var_stamp[z->id] > con_stamp[c->id])
-									aa = true;
+	//	for (auto v : x_evt)
+	//		insert(v, level);
+	//	while (!q_.empty()) {
+	//		QVar* x = q_.pop(level);
+	//		//q_.pop_back();
+	//		for (QTab* c : subscription[x]) {
+	//			if (var_stamp[x->id] > con_stamp[c->id]) {
+	//				for (auto y : c->scope) {
+	//					if (!I_.assigned(y)) {
+	//						bool aa = false;
+	//						for (auto z : c->scope)
+	//							if ((z != x) && var_stamp[z->id] > con_stamp[c->id])
+	//								aa = true;
 
-							if ((y != x) || aa)
-								if (revise(c, y, level)) {
-									if (y->faild(level)) {
-										ps_.tab = c;
-										ps_.var = y;
-										++(con_weight[c->id]);
-										ps_.state = false;
-										return ps_;
-									}
-									insert(y, level);
-								}
-						}
-					}
-					++time;
-					con_stamp[c->id] = time;
-				}
-			}
-		}
+	//						if ((y != x) || aa)
+	//							if (revise(c, y, level)) {
+	//								if (y->faild(level)) {
+	//									ps_.tab = c;
+	//									ps_.var = y;
+	//									++(con_weight[c->id]);
+	//									ps_.state = false;
+	//									return ps_;
+	//								}
+	//								insert(y, level);
+	//							}
+	//					}
+	//				}
+	//				++time;
+	//				con_stamp[c->id] = time;
+	//			}
+	//		}
+	//	}
 
-		ps_.state = true;
-		return ps_;
-	}
-	bool MAC3::revise(QTab* c, QVar* v, const int level) {
-		const int num_elements = v->size(level);
-		int a = v->head(level);
+	//	ps_.state = true;
+	//	return ps_;
+	//}
+	//bool MAC3::revise(QTab* c, QVar* v, const int level) {
+	//	const int num_elements = v->size(level);
+	//	int a = v->head(level);
 
-		while (a != Limits::INDEX_OVERFLOW) {
-			if (!seek_support(c, v, a, level)) {
-				v->remove_value(a, level);
-				//cout << "(" << v->id << ", " << a << ")" << endl;
-				++ps_.num_delete;
-			}
-			a = v->next(a, level);
-		}
+	//	while (a != Limits::INDEX_OVERFLOW) {
+	//		if (!seek_support(c, v, a, level)) {
+	//			v->remove_value(a, level);
+	//			//cout << "(" << v->id << ", " << a << ")" << endl;
+	//			++ps_.num_delete;
+	//		}
+	//		a = v->next(a, level);
+	//	}
 
-		return num_elements != v->size(level);
-	}
+	//	return num_elements != v->size(level);
+	//}
 
-	bool MAC3::seek_support(QTab* c, QVar* v, const int a, const int level) {
-		c->get_first_valid_tuple(v, a, tmp_tuple_, level);
-		while (Existed(tmp_tuple_)) {
-			//cout << "tuple: " << tmp_tuple_[0] << "," << tmp_tuple_[1] << endl;
-			if (c->sat(tmp_tuple_))
-				return true;
-			else
-				c->get_next_valid_tuple(v, a, tmp_tuple_, level);
-		}
-		return false;
-	}
+	//bool MAC3::seek_support(QTab* c, QVar* v, const int a, const int level) {
+	//	c->get_first_valid_tuple(v, a, tmp_tuple_, level);
+	//	while (Existed(tmp_tuple_)) {
+	//		//cout << "tuple: " << tmp_tuple_[0] << "," << tmp_tuple_[1] << endl;
+	//		if (c->sat(tmp_tuple_))
+	//			return true;
+	//		else
+	//			c->get_next_valid_tuple(v, a, tmp_tuple_, level);
+	//	}
+	//	return false;
+	//}
 	////////////////////////////////////////////////////////////////////////////////
 
 	MAC3bit::MAC3bit(HModel* h) :BacktrackingSearch(h) {
@@ -323,7 +329,7 @@ namespace  cp {
 
 		for (QTab* c : tabs) {
 			for (auto t : c->tuples) {
-				const int index[] = { get_QConVal_index(c, c->scope[0], t[0]), get_QConVal_index(c, c->scope[1], t[1]) };
+				const int index[] = { get_QConVal_index(*c,0, t[0]), get_QConVal_index(*c, 1, t[1]) };
 				const BitIndex idx[] = { GetBitIdx(t[0]), GetBitIdx(t[1]) };
 				bitSup_[index[0]][idx[1].x] |= U64_MASK1[idx[1].y];
 				bitSup_[index[1]][idx[0].x] |= U64_MASK1[idx[0].y];
@@ -344,7 +350,7 @@ namespace  cp {
 		ps_.num_delete = 0;
 
 		for (auto v : x_evt)
-			insert(v, level);
+			insert(*v, level);
 		while (!q_.empty()) {
 			QVar* x = q_.pop(level);
 			//q_.pop_back();
@@ -358,7 +364,7 @@ namespace  cp {
 									aa = true;
 
 							if ((y != x) || aa)
-								if (revise(c, y, level)) {
+								if (revise(*c, *y, level)) {
 									if (y->faild(level)) {
 										ps_.tab = c;
 										ps_.var = y;
@@ -366,7 +372,7 @@ namespace  cp {
 										ps_.state = false;
 										return ps_;
 									}
-									insert(y, level);
+									insert(*y, level);
 								}
 						}
 					}
@@ -380,25 +386,25 @@ namespace  cp {
 		return ps_;
 	}
 
-	bool MAC3bit::revise(QTab* c, QVar* v, const int level) {
+	bool MAC3bit::revise(QTab& c, QVar& v, const int level) {
 		++ss_.num_revisions;
-		const int num_elements = v->size(level);
-		int a = v->head(level);
+		const int num_elements = v.size(level);
+		int a = v.head(level);
 		while (a != Limits::INDEX_OVERFLOW) {
 			if (!seek_support(c, v, a, level)) {
-				v->remove_value(a, level);
+				v.remove_value(a, level);
 				//cout << "(" << v->id << ", " << a << ")" << endl;
 				++ps_.num_delete;
 			}
-			a = v->next(a, level);
+			a = v.next(a, level);
 		}
-		return num_elements != v->size(level);
+		return num_elements != v.size(level);
 	}
 
-	bool MAC3bit::seek_support(QTab* c, QVar* v, const int a, const int p) const {
+	bool MAC3bit::seek_support(QTab& c, QVar& v, const int a, const int p) const {
 		const int idx = get_QConVal_index(c, v, a);
-		for (QVar* y : c->scope)
-			if (y->id != v->id)
+		for (QVar* y : c.scope)
+			if (y->id != v.id)
 				for (int i = 0; i < y->num_bit; ++i)
 					if (bitSup_[idx][i] & y->bitDom(p)[i])
 						return true;
@@ -407,84 +413,84 @@ namespace  cp {
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	MAC3rm::MAC3rm(HModel* h) :BacktrackingSearch(h) {
-		Exclude(tmp_tuple_);
-		res_.resize(tabs.size()*max_dom_size*max_arity, tmp_tuple_);
-	}
+	//MAC3rm::MAC3rm(HModel* h) :BacktrackingSearch(h) {
+	//	Exclude(tmp_tuple_);
+	//	res_.resize(tabs.size()*max_dom_size*max_arity, tmp_tuple_);
+	//}
 
-	PropagationState MAC3rm::propagate(vector<QVar*>& x_evt, const int level) {
-		q_.clear();
-		ps_.level = level;
-		ps_.num_delete = 0;
+	//PropagationState MAC3rm::propagate(vector<QVar*>& x_evt, const int level) {
+	//	q_.clear();
+	//	ps_.level = level;
+	//	ps_.num_delete = 0;
 
-		for (auto v : x_evt)
-			insert(v, level);
-		while (!q_.empty()) {
-			QVar* x = q_.pop(level);
-			//q_.pop_back();
-			for (QTab* c : subscription[x]) {
-				if (var_stamp[x->id] > con_stamp[c->id]) {
-					for (auto y : c->scope) {
-						if (!I_.assigned(y)) {
-							bool aa = false;
-							for (auto z : c->scope)
-								if ((z != x) && var_stamp[z->id] > con_stamp[c->id])
-									aa = true;
+	//	for (auto v : x_evt)
+	//		insert(v, level);
+	//	while (!q_.empty()) {
+	//		QVar* x = q_.pop(level);
+	//		//q_.pop_back();
+	//		for (QTab* c : subscription[x]) {
+	//			if (var_stamp[x->id] > con_stamp[c->id]) {
+	//				for (auto y : c->scope) {
+	//					if (!I_.assigned(y)) {
+	//						bool aa = false;
+	//						for (auto z : c->scope)
+	//							if ((z != x) && var_stamp[z->id] > con_stamp[c->id])
+	//								aa = true;
 
-							if ((y != x) || aa)
-								if (revise(c, y, level)) {
-									if (y->faild(level)) {
-										ps_.tab = c;
-										ps_.var = y;
-										++(con_weight[c->id]);
-										ps_.state = false;
-										return ps_;
-									}
-									insert(y, level);
-								}
-						}
-					}
-					++time;
-					con_stamp[c->id] = time;
-				}
-			}
-		}
+	//						if ((y != x) || aa)
+	//							if (revise(c, y, level)) {
+	//								if (y->faild(level)) {
+	//									ps_.tab = c;
+	//									ps_.var = y;
+	//									++(con_weight[c->id]);
+	//									ps_.state = false;
+	//									return ps_;
+	//								}
+	//								insert(y, level);
+	//							}
+	//					}
+	//				}
+	//				++time;
+	//				con_stamp[c->id] = time;
+	//			}
+	//		}
+	//	}
 
-		ps_.state = true;
-		return ps_;
-	}
+	//	ps_.state = true;
+	//	return ps_;
+	//}
 
-	bool MAC3rm::revise(QTab* c, QVar* v, const int level) {
-		const int num_elements = v->size(level);
-		int a = v->head(level);
-		while (a != Limits::INDEX_OVERFLOW) {
-			if (!seek_support(c, v, a, level)) {
-				v->remove_value(a, level);
-				//cout << "(" << v->id << ", " << a << ")" << endl;
-				++ps_.num_delete;
-			}
-			a = v->next(a, level);
-		}
-		return num_elements != v->size(level);
-	}
+	//bool MAC3rm::revise(QTab* c, QVar* v, const int level) {
+	//	const int num_elements = v->size(level);
+	//	int a = v->head(level);
+	//	while (a != Limits::INDEX_OVERFLOW) {
+	//		if (!seek_support(c, v, a, level)) {
+	//			v->remove_value(a, level);
+	//			//cout << "(" << v->id << ", " << a << ")" << endl;
+	//			++ps_.num_delete;
+	//		}
+	//		a = v->next(a, level);
+	//	}
+	//	return num_elements != v->size(level);
+	//}
 
-	bool MAC3rm::seek_support(QTab* c, QVar* v, const int a, const int p) {
-		tmp_tuple_ = res_[get_QConVal_index(c, v, a)];
-		if (c->is_valid(tmp_tuple_, p))
-			return true;
+	//bool MAC3rm::seek_support(QTab* c, QVar* v, const int a, const int p) {
+	//	tmp_tuple_ = res_[get_QConVal_index(c, v, a)];
+	//	if (c->is_valid(tmp_tuple_, p))
+	//		return true;
 
-		c->get_first_valid_tuple(v, a, tmp_tuple_, p);
-		while (Existed(tmp_tuple_)) {
-			if (c->sat(tmp_tuple_)) {
-				for (int i = 0; i < c->arity; ++i)
-					res_[get_QConVal_index(c, c->scope[i], tmp_tuple_[i])] = tmp_tuple_;
-				return true;
-			}
-			c->get_next_valid_tuple(v, a, tmp_tuple_, p);
-		}
+	//	c->get_first_valid_tuple(v, a, tmp_tuple_, p);
+	//	while (Existed(tmp_tuple_)) {
+	//		if (c->sat(tmp_tuple_)) {
+	//			for (int i = 0; i < c->arity; ++i)
+	//				res_[get_QConVal_index(c, c->scope[i], tmp_tuple_[i])] = tmp_tuple_;
+	//			return true;
+	//		}
+	//		c->get_next_valid_tuple(v, a, tmp_tuple_, p);
+	//	}
 
-		return false;
-	}
+	//	return false;
+	//}
 	//////////////////////////////////////////////////////////////////
 
 	//lMaxRPC_bit_rm::lMaxRPC_bit_rm(HModel* h) :BacktrackingSearch(h) {

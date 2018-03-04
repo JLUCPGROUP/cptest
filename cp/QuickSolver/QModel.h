@@ -336,20 +336,20 @@ namespace cp {
 	public:
 		vars_heap() {};
 		virtual ~vars_heap();
-		void push(QVar* v, const int p);
+		void push(QVar &  v, const int p);
 		QVar* pop(const int p);
 		void initial(const int size);
 		void del() const;
-		void insert(QVar* v, const int p);
+		void insert(QVar& v, const int p);
 		bool empty() const { return !cur_size_; };
 		QVar* remove_at(const int location, const int p);
 		void clear();
 	private:
-		static inline bool compare(QVar* a, QVar* b, const int p);
+		static inline bool compare(QVar const & a, QVar const & b, const int p);
 		void filter_up(const int start, const int p) const;
 		void filter_down(const int start, const int finish, const int p) const;
 		int* position_;
-		QVar** vs_;
+		QVar**  vs_;
 		int max_size_;
 		int cur_size_ = 0;
 
@@ -364,6 +364,7 @@ namespace cp {
 		void get_first_valid_tuple(QVar* v, const int a, vector<int>& t, const int p);
 		void get_next_valid_tuple(QVar* v, const int a, vector<int>& t, const int p);
 		int index(QVar* v) const;
+		int index(QVar& v) const;
 		bool is_valid(vector<int>& t, const int p);
 		const int id;
 		const int arity;
