@@ -70,7 +70,7 @@ namespace  cp {
 
 		con_stamp.resize(num_tabs, 0);
 		var_stamp.resize(num_tabs, 0);
-		con_weight.resize(num_tabs, 0);
+		con_weight.resize(num_tabs, 1);
 		q_.initial(num_vars);
 		tmp_tuple_.resize(max_arity);
 		Exclude(tmp_tuple_);
@@ -123,14 +123,14 @@ namespace  cp {
 			//cout << "=" << v_a << endl;
 			top_ = new_level();
 			I_.push(v_a);
-			++ss_.num_positive;
+			++ss_.num_positives;
 			v_a.v->reduce_to(v_a.a, top_);
 			x_evt.push_back(v_a.v);
 			consistent_ = propagate(x_evt, top_).state;
 			x_evt.clear();
 			//I.update_model_assigned();
 			if (consistent_&&I_.full()) {
-				cout << I_ << endl;
+				//cout << I_ << endl;
 				finished_ = true;
 				//++sol_count_;
 				//consistent_ = false;
@@ -141,7 +141,7 @@ namespace  cp {
 				//cout << "!" << v_a << endl;
 				top_ = back_level();
 				v_a.v->remove_value(v_a.a, top_);
-				++ss_.num_negative;
+				++ss_.num_negatives;
 				x_evt.push_back(v_a.v);
 				consistent_ = v_a.v->size(top_) && propagate(x_evt, top_).state;
 				x_evt.clear();
@@ -182,7 +182,7 @@ namespace  cp {
 			for (auto v : vars)
 				if (!I_.assigned(v)) {
 					int dom_deg;
-					if (neighborhood[v].size() == 0)
+					if (neighborhood[v].empty())
 						dom_deg = -1;
 					else
 						dom_deg = v->size(p) / neighborhood[v].size();
@@ -208,7 +208,8 @@ namespace  cp {
 					}
 
 					if (x->size(p) == 1 || x_w == 0)
-						x_dw = -1;
+						//x_dw = -1;
+						return x;
 					else
 						x_dw = x->size(p) / x_w;
 
@@ -318,7 +319,7 @@ namespace  cp {
 		bitSup_.resize(num_tabs*max_dom_size*max_arity, vector<u64>(max_bitDom_size, 0));
 		for (QTab* c : tabs) {
 			for (auto t : c->tuples) {
-				const int index[] = { get_QConVal_index(c, 0, t[0]), get_QConVal_index(c, 1, t[1]) };
+				const int index[] = { get_QConVal_index(c, c->scope[0], t[0]), get_QConVal_index(c, c->scope[1], t[1]) };
 				const tuple<int, int> idx[] = { GetBitIdx(t[0]), GetBitIdx(t[1]) };
 				bitSup_[index[0]][get<0>(idx[1])] |= U64_MASK1[get<1>(idx[1])];
 				bitSup_[index[1]][get<0>(idx[0])] |= U64_MASK1[get<1>(idx[0])];
@@ -369,6 +370,7 @@ namespace  cp {
 	}
 
 	bool MAC3bit::revise(QTab* c, QVar* v, const int level) {
+		++ss_.num_revisions;
 		const int num_elements = v->size(level);
 		int a = v->head(level);
 		while (a != Limits::INDEX_OVERFLOW) {
@@ -464,7 +466,7 @@ namespace  cp {
 		while (Existed(tmp_tuple_)) {
 			if (c->sat(tmp_tuple_)) {
 				for (int i = 0; i < c->arity; ++i)
-					res_[get_QConVal_index(c, i, tmp_tuple_[i])] = tmp_tuple_;
+					res_[get_QConVal_index(c, c->scope[i], tmp_tuple_[i])] = tmp_tuple_;
 				return true;
 			}
 			c->get_next_valid_tuple(v, a, tmp_tuple_, p);
@@ -506,7 +508,7 @@ namespace  cp {
 		bitSup_.resize(num_tabs*max_dom_size*max_arity, vector<u64>(max_bitDom_size, 0));
 		for (QTab* c : tabs) {
 			for (auto t : c->tuples) {
-				const int index[] = { get_QConVal_index(c, 0, t[0]), get_QConVal_index(c, 1, t[1]) };
+				const int index[] = { get_QConVal_index(c, c->scope[0], t[0]), get_QConVal_index(c, c->scope[1], t[1]) };
 				const tuple<int, int> idx[] = { GetBitIdx(t[0]), GetBitIdx(t[1]) };
 				bitSup_[index[0]][get<0>(idx[1])] |= U64_MASK1[get<1>(idx[1])];
 				bitSup_[index[1]][get<0>(idx[0])] |= U64_MASK1[get<1>(idx[0])];

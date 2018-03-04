@@ -27,15 +27,16 @@ public:
 	unordered_map<QVar*, vector<QVar* >> neighborhood;
 	vector<vector<QVar*>> neibor_vars;
 	//  由于所有变量的域长度不一定相同 所以这里的c-value值不一定真实存在
-	inline int get_QConVal_index(QConVal& c_val) const {
-		return  c_val.c->id * max_arity * max_dom_size + c_val.c->index(c_val.v) * max_dom_size + c_val.a;
-	}
-	inline int get_QConVal_index(QTab* c, QVar* v, const int a) const {
-		return  c->id * max_arity * max_dom_size + c->index(v) * max_dom_size + a;
-	}
-	inline int get_QConVal_index(QTab* c, const int v_idx, const int a) const {
-		return  c->id * max_arity * max_dom_size + v_idx * max_dom_size + a;
-	}
+#define get_QConVal_index(c,v,a) c->id * max_arity * max_dom_size + c->index(v) * max_dom_size + a
+	//inline int get_QConVal_index(QConVal& c_val) const {
+	//	return  c_val.c->id * max_arity * max_dom_size + c_val.c->index(c_val.v) * max_dom_size + c_val.a;
+	//}
+	//inline int get_QConVal_index(QTab* c, QVar* v, const int a) const {
+	//	return  c->id * max_arity * max_dom_size + c->index(v) * max_dom_size + a;
+	//}
+	//inline int get_QConVal_index(QTab* c, const int v_idx, const int a) const {
+	//	return  c->id * max_arity * max_dom_size + v_idx * max_dom_size + a;
+	//}
 protected:
 	vector<int> tmp_tuple_;
 	vars_cir_que q_;

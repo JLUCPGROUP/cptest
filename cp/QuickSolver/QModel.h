@@ -422,17 +422,19 @@ namespace cp {
 		QVar* var = nullptr;
 		QVal v_a_fail;
 		int level = 0;
+		u64 revisions = 0;
 	};
 
 	struct SearchStatistics {
-		uint64_t num_sol = 0;
-		uint64_t num_positive = 0;
-		uint64_t num_negative = 0;
-		uint64_t nodes = 0;
-		uint64_t build_time = 0;
-		uint64_t solve_time = 0;
+		u64 num_sol = 0;
+		u64 num_positives = 0;
+		u64 num_negatives = 0;
+		u64 nodes = 0;
+		u64 build_time = 0;
+		u64 solve_time = 0;
 		bool time_out = false;
 		bool pass;
+		u64 num_revisions = 0;
 		//int n_deep = 0;
 	};
 	struct SearchScheme {
