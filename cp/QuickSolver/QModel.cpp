@@ -7,31 +7,51 @@ namespace cp {
 		capacity(v->vals.size()),
 		limit(capacity & MOD_MASK),
 		num_bit(ceil(float(capacity) / BITSIZE)),
-		vals(v->vals) {
-		bit_tmp_.resize(num_bit, ULLONG_MAX);
-		if (limit != BITSIZE)
-			bit_tmp_.back() >>= BITSIZE - limit;
+		vals(v->vals),
+		size_tmp(v->vals.size()) {
+		bit_tmp_ = new u64[num_bit];
+		memset(bit_tmp_, ULLONG_MAX, num_bit * sizeof(u64));
+		bit_tmp_[num_bit - 1] >>= BITSIZE - limit;
+		//bit_tmp_.resize(num_bit, ULLONG_MAX);
+		//if (limit != BITSIZE)
+		//	bit_tmp_.back() >>= BITSIZE - limit;
+	}
+
+	QVar::~QVar() {
+		delete[] bit_tmp_;
+		if (runtime_) {
+			for (int i = 0; i < num_bd_; ++i)
+				delete[] bit_doms_[i];
+			delete[] bit_doms_;
+
+			delete[] size_;
+		}
 	}
 
 	void QVar::runtime(const int size) {
-		bit_doms_.resize(size + 3, bit_tmp_);
-		//assigned_.resize(size + 3, false);
-		size_.resize(size + 3, -1);
-		size_[0] = capacity;
-		//tmp = size + 1;
+		num_bd_ = size + 3;
+		bit_doms_ = new u64*[num_bd_]();
+		for (int i = 0; i < num_bd_; ++i)
+			bit_doms_[i] = new u64[num_bit]();
+
+		size_ = new int[num_bd_];
+		memset(size_, -1, num_bd_ * sizeof(int));
+		size_[0] = size_tmp;
+
+		for (int i = 0; i < num_bit; ++i)
+			bit_doms_[0][i] = bit_tmp_[i];
 	}
 
-	void QVar::remove_value(const int a, const int p) {
+	void QVar::remove_value(const int a, const int p) const {
 		const auto index = GetBitIdx(a);
-		bit_doms_[p][get<0>(index)] &= U64_MASK0[get<1>(index)];
+		bit_doms_[p][index.x] &= U64_MASK0[index.y];
 		--size_[p];
 	}
 
-	void QVar::reduce_to(const int a, const int p) {
+	void QVar::reduce_to(const int a, const int p) const {
 		const auto index = GetBitIdx(a);
-		for (auto& v : bit_doms_[p])
-			v = 0;
-		bit_doms_[p][get<0>(index)] |= U64_MASK1[get<1>(index)];
+		memset(bit_doms_[p], 0, num_bit * sizeof(u64));
+		bit_doms_[p][index.x] |= U64_MASK1[index.y];
 		size_[p] = 1;
 	}
 
@@ -41,27 +61,27 @@ namespace cp {
 
 	int QVar::next(const int a, const int p) const {
 		const auto index = GetBitIdx(a);
-		const u64 b = (bit_doms_[p][get<0>(index)] >> get<1>(index)) >> 1;
+		const u64 b = (bit_doms_[p][index.x] >> index.y) >> 1;
 		if (b)
 			return a + FirstOne(b) + 1;
 
-		for (size_t i = get<0>(index) + 1; i < num_bit; ++i)
+		for (int i = index.x + 1; i < num_bit; ++i)
 			if (bit_doms_[p][i])
 				return GetValue(i, FirstOne(bit_doms_[p][i]));
 
 		return Limits::INDEX_OVERFLOW;
 	}
 
-	void QVar::next_value(int& a, const int p) {
-		auto index = GetBitIdx(a++);
-		const u64 b = (bit_doms_[p][get<0>(index)] >> get<1>(index)) >> 1;
+	void QVar::next_value(int& a, const int p) const {
+		const auto index = GetBitIdx(a++);
+		const u64 b = (bit_doms_[p][index.x] >> index.y) >> 1;
 
 		if (b) {
 			a = a + FirstOne(b);
 			return;
 		}
 
-		for (size_t i = get<0>(index) + 1; i < num_bit; ++i)
+		for (int i = index.x + 1; i < num_bit; ++i)
 			if (bit_doms_[p][i]) {
 				a = GetValue(i, FirstOne(bit_doms_[p][i]));
 				return;
@@ -74,7 +94,7 @@ namespace cp {
 		if (a == Limits::INDEX_OVERFLOW)
 			return false;
 		const auto index = GetBitIdx(a);
-		return bit_doms_[p][get<0>(index)] & U64_MASK1[get<1>(index)];
+		return bit_doms_[p][index.x] & U64_MASK1[index.y];
 	}
 
 	int QVar::head(const int p) const {
@@ -85,158 +105,36 @@ namespace cp {
 		return Limits::INDEX_OVERFLOW;
 	}
 
-	void QVar::show(const int p) {
+	void QVar::show(const int p) const {
 		cout << "id = " << id << ": ";
 		for (auto a : vals)
 			if (have(a, p))
 				cout << a << " ";
-		//cout << "[" << assigned_[p] << "]";
 		cout << endl;
 	}
 
-	void QVar::back_to(const int src, const int dest) {
-		//for (int i = dest; i < src; ++i)
-		//	size_[i] = -1;
-		//assigned_[i] = false;
-	}
-
-	void QVar::delete_level(const int p) {
-		//assigned_[p] = false;
-		size_[p] = -1;
-	}
-
-	void QVar::copy_level(const int src, const int dest) {
-		//bit_doms_[dest].assign(bit_doms_[src].begin(), bit_doms_[src].end());
-		for (int i = 0; i < num_bit; ++i)
-			bit_doms_[dest][i] = bit_doms_[src][i];
-		//assigned_[dest] = assigned_[src];
-	}
-
-	void QVar::new_level(const int src, const int dest) {
-		//bit_doms_[dest].assign(bit_doms_[src].begin(), bit_doms_[src].end());
-		for (int i = 0; i < num_bit; ++i)
-			bit_doms_[dest][i] = bit_doms_[src][i];
-		//assigned_[dest] = assigned_[src];
-		size_[dest] = size_[src];
-	}
-	//////////////////////////////////////////////////////////////////////////
-	//QVar::QVar(HVar* v) :
-	//	id(v->id),
-	//	capacity(v->vals.size()),
-	//	limit(capacity & MOD_MASK),
-	//	num_bit(ceil(float(capacity) / BITSIZE)),
-	//	vals(v->vals) {
-	//	bit_tmp_.resize(num_bit, ULLONG_MAX);
-	//	if (limit != BITSIZE)
-	//		bit_tmp_.back() >>= BITSIZE - limit;
-	//}
-	//
-	//void QVar::runtime(const int size) {
-	//	bit_doms_.resize(size + 3, bit_tmp_);
-	//	//assigned_.resize(size + 3, false);
-	//	size_.resize(size + 3, -1);
-	//	size_[0] = capacity;
-	//	//tmp = size + 1;
-	//}
-	//
-	//void QVar::remove_value(const int a, const int p) {
-	//	const auto index = GetBitIdx(a);
-	//	bit_doms_[p][get<0>(index)] &= U64_MASK0[get<1>(index)];
-	//	--size_[p];
-	//}
-	//
-	//void QVar::reduce_to(const int a, const int p) {
-	//	const auto index = GetBitIdx(a);
-	//	for (auto& v : bit_doms_[p])
-	//		v = 0;
-	//	bit_doms_[p][get<0>(index)] |= U64_MASK1[get<1>(index)];
-	//	size_[p] = 1;
-	//}
-	//
-	//int QVar::size(const int p) const {
-	//	return size_[p];
-	//}
-	//
-	//int QVar::next(const int a, const int p) const {
-	//	const auto index = GetBitIdx(a);
-	//	const u64 b = (bit_doms_[p][get<0>(index)] >> get<1>(index)) >> 1;
-	//	if (b)
-	//		return a + FirstOne(b) + 1;
-	//
-	//	for (size_t i = get<0>(index) + 1; i < num_bit; ++i)
-	//		if (bit_doms_[p][i])
-	//			return GetValue(i, FirstOne(bit_doms_[p][i]));
-	//
-	//	return Limits::INDEX_OVERFLOW;
-	//}
-	//
-	//void QVar::next_value(int& a, const int p) {
-	//	auto index = GetBitIdx(a++);
-	//	const u64 b = (bit_doms_[p][get<0>(index)] >> get<1>(index)) >> 1;
-	//
-	//	if (b) {
-	//		a = a + FirstOne(b) + 1;
-	//		return;
-	//	}
-	//
-	//	for (size_t i = get<0>(index) + 1; i < num_bit; ++i)
-	//		if (bit_doms_[p][i]) {
-	//			a = GetValue(i, FirstOne(bit_doms_[p][i]));
-	//			return;
-	//		}
-	//
-	//	a = Limits::INDEX_OVERFLOW;
-	//}
-	//
-	//bool QVar::have(const int a, const int p) const {
-	//	if (a == Limits::INDEX_OVERFLOW)
-	//		return false;
-	//	const auto index = GetBitIdx(a);
-	//	return bit_doms_[p][get<0>(index)] & U64_MASK1[get<1>(index)];
-	//}
-	//
-	//int QVar::head(const int p) const {
-	//	for (size_t i = 0; i < num_bit; ++i)
-	//		if (bit_doms_[p][i])
-	//			return GetValue(i, FirstOne(bit_doms_[p][i]));
-	//
-	//	return Limits::INDEX_OVERFLOW;
-	//}
-	//
-	//void QVar::show(const int p) {
-	//	cout << "id = " << id << ": ";
-	//	for (auto a : vals)
-	//		if (have(a, p))
-	//			cout << a << " ";
-	//	//cout << "[" << assigned_[p] << "]";
-	//	cout << endl;
-	//}
-	//
 	//void QVar::back_to(const int src, const int dest) {
 	//	//for (int i = dest; i < src; ++i)
 	//	//	size_[i] = -1;
 	//	//assigned_[i] = false;
 	//}
-	//
-	//void QVar::delete_level(const int p) {
-	//	//assigned_[p] = false;
-	//	size_[p] = -1;
-	//}
-	//
-	//void QVar::copy_level(const int src, const int dest) {
-	//	//bit_doms_[dest].assign(bit_doms_[src].begin(), bit_doms_[src].end());
-	//	for (int i = 0; i < num_bit; ++i)
-	//		bit_doms_[dest][i] = bit_doms_[src][i];
-	//	//assigned_[dest] = assigned_[src];
-	//}
-	//
-	//void QVar::new_level(const int src, const int dest) {
-	//	//bit_doms_[dest].assign(bit_doms_[src].begin(), bit_doms_[src].end());
-	//	for (int i = 0; i < num_bit; ++i)
-	//		bit_doms_[dest][i] = bit_doms_[src][i];
-	//	//assigned_[dest] = assigned_[src];
-	//	size_[dest] = size_[src];
-	//}
+
+	void QVar::delete_level(const int p) const {
+		size_[p] = -1;
+	}
+
+	void QVar::copy_level(const int src, const int dest) const {
+		for (int i = 0; i < num_bit; ++i)
+			bit_doms_[dest][i] = bit_doms_[src][i];
+		size_[dest] = size_[src];
+	}
+
+	void QVar::new_level(const int src, const int dest) const {
+		for (int i = 0; i < num_bit; ++i)
+			bit_doms_[dest][i] = bit_doms_[src][i];
+		size_[dest] = size_[src];
+	}
+
 	//////////////////////////////////////////////////////////////////////////////
 	const QVal& QVal::operator=(const QVal& rhs) {
 		v = rhs.v;
@@ -269,6 +167,8 @@ namespace cp {
 	///////////////////////////////////////////////////////////////////////
 	void assignments_stack::initial(HModel * m) {
 		max_size_ = m->vars.size();
+		//qvals_ = new QVal[m->vars.size()];
+		//v_=new int[m->vars.size()];
 		qvals_.reserve(m->vars.size());
 		v_.resize(m->vars.size(), -1);
 	}
@@ -375,7 +275,103 @@ namespace cp {
 		return size_;
 	}
 	///////////////////////////////////////////////////////////////////////
-	QTab::QTab(HTab * t, vector<QVar*> scope) :
+
+	vars_heap::~vars_heap() {
+		del();
+	}
+
+	void vars_heap::push(QVar* v, const int p) {
+		insert(v, p);
+	}
+
+	QVar* vars_heap::pop(const int p) {
+		return remove_at(0, p);
+	}
+
+	void vars_heap::initial(const int size) {
+		max_size_ = size;
+		vs_ = new QVar*[size];
+		position_ = new int[size];
+		memset(position_, -1, size * sizeof(int));
+	}
+
+	void vars_heap::del() const {
+		delete[] vs_;
+		delete[] position_;
+	}
+
+	void vars_heap::insert(QVar* v, const int p) {
+		if (position_[v->id] >= 0)
+			filter_up(position_[v->id], p);
+		else {
+			vs_[cur_size_] = v;
+			filter_up(cur_size_, p);
+			cur_size_++;
+		}
+	}
+
+	QVar* vars_heap::remove_at(const int location, const int p) {
+		QVar* v = vs_[location];
+		vs_[location] = vs_[cur_size_ - 1];
+		cur_size_--;
+		filter_down(location, cur_size_ - 1, p);
+		position_[v->id] = -1;
+		return v;
+	}
+
+	void vars_heap::clear() {
+		memset(position_, -1, max_size_ * sizeof(int));
+		cur_size_ = 0;
+	}
+
+	bool vars_heap::compare(QVar* a, QVar* b, const int p) {
+		return a->size(p) < b->size(p);
+	}
+
+	void vars_heap::filter_up(const int start, const int p) const {
+		int j = start;
+		int i = (j - 1) / 2;
+		QVar* v = vs_[j];
+		while (j > 0) {
+			if (compare(vs_[j], v, p)) {
+				break;
+			}
+			else {
+				vs_[j] = vs_[i];
+				position_[vs_[j]->id] = j;
+				j = i;
+				i = (i - 1) / 2;
+			}
+		}
+		vs_[j] = v;
+		position_[vs_[j]->id] = j;
+	}
+
+	void vars_heap::filter_down(const int start, const int finish, const int p) const {
+		int i = start;
+		int j = 2 * i + 1;
+		QVar* v = vs_[i];
+
+		while (j <= finish) {
+			if (j < finish && compare(vs_[j + 1], vs_[j], p))
+				j++;
+
+			if (compare(v, vs_[j], p))
+				break;
+			else {
+				vs_[i] = vs_[j];
+				position_[vs_[i]->id] = i;
+				i = j;
+				j = 2 * j + 1;
+			}
+		}
+
+		vs_[i] = v;
+		position_[vs_[i]->id] = i;
+	}
+
+	///////////////////////////////////////////////////////////////////////
+	QTab::QTab(HTab * t, vector<QVar*>& scope) :
 		id(t->id),
 		arity(scope.size()),
 		scope(scope),

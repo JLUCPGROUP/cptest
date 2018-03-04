@@ -160,24 +160,27 @@ namespace cp {
 		tuple[0] = INT_MAX;
 	}
 
-	typedef struct BitIndex {
+	struct BitIndex {
 		int x;
 		int y;
 	};
 
 	//inline BitIndex GetBitIdx(const int idx) {
+	//	inline BitIndex GetBitIdx(const int idx) {
+
 	//	tuple<int, int> a;
 	//	get<0>(a) = idx >> DIV_BIT;
 	//	get<1>(a) = idx & MOD_MASK;
 	//	return BitIndex { idx >> DIV_BIT, idx & MOD_MASK };
 	//}
+#define GetBitIdx(idx) BitIndex { idx >> DIV_BIT, idx & MOD_MASK }
 
-	inline tuple<int, int> GetBitIdx(const int idx) {
-		tuple<int, int> a;
-		get<0>(a) = idx >> DIV_BIT;
-		get<1>(a) = idx & MOD_MASK;
-		return a;
-	}
+	//inline tuple<int, int> GetBitIdx(const int idx) {
+	//	tuple<int, int> a;
+	//	get<0>(a) = idx >> DIV_BIT;
+	//	get<1>(a) = idx & MOD_MASK;
+	//	return a;
+	//}
 	inline int GetValue(const int i, const int j) {
 		return  (i << DIV_BIT) + j;
 	}
@@ -214,12 +217,13 @@ namespace cp {
 	class QVar {
 	public:
 		QVar(HVar* v);
+		~QVar();
 		void runtime(const int size);
-		void remove_value(const int a, const int p);
-		void reduce_to(const int a, const int p);
+		void remove_value(const int a, const int p) const;
+		void reduce_to(const int a, const int p) const;
 		int size(const int p) const;
 		inline int next(const int a, const int p) const;
-		void next_value(int& a, const int p);
+		void next_value(int& a, const int p) const;
 		//int prev(const int a, const int p) const;
 		inline bool have(const int a, const int p) const;
 		inline int head(const int p) const;
@@ -227,64 +231,30 @@ namespace cp {
 		//inline void assign(const bool a, const int p) { assigned_[p] = a; }
 		//int tail(const int p) const;
 		bool faild(const int p) const { return size(p) == 0; };
-		bitSetVector& bitDom(const int p) { return bit_doms_[p]; }
-		void show(const int p);
-		inline void back_to(const int src, const int dest);
-		void delete_level(const int p);
-		void copy_level(const int src, const int dest);
+		u64* bitDom(const int p) const { return bit_doms_[p]; }
+		void show(const int p) const;
+		//inline void back_to(const int src, const int dest);
+		void delete_level(const int p) const;
+		void copy_level(const int src, const int dest) const;
 		//inline int new_level(int src);
-		void new_level(const int src, const int dest);
+		void new_level(const int src, const int dest) const;
 
 		const int id;
 		const int capacity;
 		const int limit;
 		const int num_bit;
 		const vector<int> vals;
+		const int size_tmp;
 		//static int tmp;
 	private:
 		//int top_;
 		//vector<bool> assigned_;
-		vector<int> size_;
-		bitSetVector bit_tmp_;
-		vector<bitSetVector> bit_doms_;
+		bool runtime_ = false;
+		int* size_;
+		u64* bit_tmp_;
+		u64** bit_doms_;
+		int num_bd_;
 	};
-	//class QVar {
-	//public:
-	//	QVar(HVar* v);
-	//	void runtime(const int size);
-	//	void remove_value(const int a, const int p);
-	//	void reduce_to(const int a, const int p);
-	//	int size(const int p) const;
-	//	inline int next(const int a, const int p) const;
-	//	inline void next_value(int& a, const int p);
-	//	//int prev(const int a, const int p) const;
-	//	inline bool have(const int a, const int p) const;
-	//	inline int head(const int p) const;
-	//	//inline bool assigned(const int p) const { return assigned_[p]; }
-	//	//inline void assign(const bool a, const int p) { assigned_[p] = a; }
-	//	//int tail(const int p) const;
-	//	bool faild(const int p) const { return size(p) == 0; };
-	//	bitSetVector& bitDom(const int p) { return bit_doms_[p]; }
-	//	void show(const int p);
-	//	inline void back_to(const int src, const int dest);
-	//	void delete_level(const int p);
-	//	void copy_level(const int src, const int dest);
-	//	//inline int new_level(int src);
-	//	void new_level(const int src, const int dest);
-	//
-	//	const int id;
-	//	const int capacity;
-	//	const int limit;
-	//	const int num_bit;
-	//	const vector<int> vals;
-	//	//static int tmp;
-	//private:
-	//	//int top_;
-	//	//vector<bool> assigned_;
-	//	int* size_;
-	//	u64* bit_tmp_;
-	//	u64** bit_doms_;
-	//};
 
 	class QVal {
 	public:
@@ -314,8 +284,8 @@ namespace cp {
 	class assignments_stack {
 	public:
 		assignments_stack() {};
-		void initial(HModel* m);
 		~assignments_stack() {};
+		void initial(HModel* m);
 		void push(QVal& v_a);
 		QVal pop();
 		QVal top() const;
@@ -332,6 +302,8 @@ namespace cp {
 		friend ostream& operator<< (std::ostream &os, assignments_stack &I);
 		friend ostream& operator<< (std::ostream &os, assignments_stack* I);
 	protected:
+		//int* v_;
+		//QVal* qvals_;
 		vector<int> v_;
 		vector<QVal> qvals_;
 		int max_size_;
@@ -360,9 +332,32 @@ namespace cp {
 		int size_;
 	};
 
+	class vars_heap {
+	public:
+		vars_heap() {};
+		virtual ~vars_heap();
+		void push(QVar* v, const int p);
+		QVar* pop(const int p);
+		void initial(const int size);
+		void del() const;
+		void insert(QVar* v, const int p);
+		bool empty() const { return !cur_size_; };
+		QVar* remove_at(const int location, const int p);
+		void clear();
+	private:
+		static inline bool compare(QVar* a, QVar* b, const int p);
+		void filter_up(const int start, const int p) const;
+		void filter_down(const int start, const int finish, const int p) const;
+		int* position_;
+		QVar** vs_;
+		int max_size_;
+		int cur_size_ = 0;
+
+	};
+
 	class QTab {
 	public:
-		QTab(HTab* t, vector<QVar*> scope);
+		QTab(HTab* t, vector<QVar*>& scope);
 		bool sat(vector<int> &t) const;
 		void get_first_valid_tuple(QVal& v_a, vector<int>& t, const int p);
 		void get_next_valid_tuple(QVal& v_a, vector<int>& t, const int p);
@@ -380,7 +375,7 @@ namespace cp {
 	class arc {
 	public:
 		QTab * c;
-		QVar* v;
+		QVar * v;
 		arc() :c(nullptr), v(nullptr) {};
 		arc(QTab* c, QVar* v) :c(c), v(v) {}
 		virtual ~arc() {}
