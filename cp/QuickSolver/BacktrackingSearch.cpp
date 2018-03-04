@@ -130,7 +130,7 @@ namespace  cp {
 			x_evt.clear();
 			//I.update_model_assigned();
 			if (consistent_&&I_.full()) {
-				//cout << I_ << endl;
+				cout << I_ << endl;
 				finished_ = true;
 				//++sol_count_;
 				//consistent_ = false;
