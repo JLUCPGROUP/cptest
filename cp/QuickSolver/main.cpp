@@ -15,8 +15,8 @@ int main() {
 	//s.solve(Heuristic::Var::VRH_DOM_WDEG_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
 	s.solve(Heuristic::Var::VRH_DOM_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
 	cout << "time = " << s.statistics().solve_time << endl;
-	cout << "positive = " << s.statistics().num_positives << endl;
-	cout << "num_revisions = " << s.statistics().num_revisions << endl;
+	cout << "positives = " << s.statistics().num_positives << endl;
+	cout << "revisions = " << s.statistics().num_revisions << endl;
 	delete hm;
 	return 0;
 }
