@@ -11,9 +11,13 @@ int main() {
 	XBuilder builder(X_PATH, XRT_BM_PATH);
 	HModel* hm = new HModel();
 	builder.GenerateHModel(hm);
-	MAC3bit s(hm);
-	//s.solve(Heuristic::Var::VRH_DOM_WDEG_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
-	s.solve(Heuristic::Var::VRH_DOM_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
+	//MAC3bit s(*hm);
+	//MAC3rm s(*hm);
+	lMaxRPC_bit_rm s(*hm);
+	//s.propagate(s.vars, 0);
+	s.solve(Heuristic::Var::VRH_DOM_WDEG_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
+	//s.solve(Heuristic::Var::VRH_DOM_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
+	cout << builder.file_name() << endl;
 	cout << "time = " << s.statistics().solve_time << endl;
 	cout << "positives = " << s.statistics().num_positives << endl;
 	cout << "revisions = " << s.statistics().num_revisions << endl;

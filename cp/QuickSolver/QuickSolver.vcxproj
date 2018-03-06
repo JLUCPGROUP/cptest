@@ -145,6 +145,10 @@
     <ClInclude Include="QModel.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="lMaxRPC_bit_rm.cpp" />
+    <ClCompile Include="MAC3.cpp" />
+    <ClCompile Include="MAC3bit.cpp" />
+    <ClCompile Include="MAC3rm.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="BacktrackingSearch.cpp" />
     <ClCompile Include="QModel.cpp" />

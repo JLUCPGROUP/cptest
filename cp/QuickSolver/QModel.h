@@ -135,6 +135,7 @@ namespace cp {
 			VRH_DOM_MIN,
 			VRH_VWDEG,
 			VRH_DOM_DEG_MIN,
+			VRH_DOM_DDEG_MIN,
 			VRH_DOM_WDEG_MIN
 		};
 
@@ -210,7 +211,7 @@ namespace cp {
 		index = (index & 0x00FF00FF00FF00FF) + ((index >> 8) & 0x00FF00FF00FF00FF);
 		index = (index & 0x0000ffff0000ffff) + ((index >> 16) & 0x0000ffff0000ffff);
 		index = (index & 0xFFFFFFFF) + ((index & 0xFFFFFFFF00000000) >> 32);
-		//得到位数,如果为32则表示全0
+		//得到位数,如果为64则表示全0
 		return int(index);
 	}
 
@@ -245,10 +246,7 @@ namespace cp {
 		const int num_bit;
 		const vector<int> vals;
 		const int size_tmp;
-		//static int tmp;
 	private:
-		//int top_;
-		//vector<bool> assigned_;
 		bool runtime_ = false;
 		int* size_;
 		u64* bit_tmp_;
@@ -285,8 +283,8 @@ namespace cp {
 	public:
 		assignments_stack() {};
 		~assignments_stack() {};
-		void initial(HModel* m);
-		void push(QVal& v_a);
+		void initial(const HModel& m);
+		void push(const QVal& v_a);
 		QVal pop();
 		QVal top() const;
 		int size() const;
@@ -297,7 +295,8 @@ namespace cp {
 		QVal at(const int i) const;
 		void clear();
 		bool assigned(const int v) const;
-		bool assigned(const QVar* v) const;
+		//bool assigned(const QVar* v) const;
+		bool assigned(const QVar& v) const;
 		bool solution(vector<int>& sol) const;
 		friend ostream& operator<< (std::ostream &os, assignments_stack &I);
 		friend ostream& operator<< (std::ostream &os, assignments_stack* I);
@@ -361,11 +360,11 @@ namespace cp {
 		bool sat(vector<int> &t) const;
 		void get_first_valid_tuple(QVal& v_a, vector<int>& t, const int p);
 		void get_next_valid_tuple(QVal& v_a, vector<int>& t, const int p);
-		void get_first_valid_tuple(QVar* v, const int a, vector<int>& t, const int p);
-		void get_next_valid_tuple(QVar* v, const int a, vector<int>& t, const int p);
-		int index(QVar* v) const;
-		int index(QVar& v) const;
-		bool is_valid(vector<int>& t, const int p);
+		void get_first_valid_tuple(const QVar& v, const int a, vector<int>& t, const int p) const;
+		void get_next_valid_tuple(const QVar& v, const int a, vector<int>& t, const int p) const;
+		//int index(QVar* v) const;
+		int index(QVar const &  v) const;
+		bool is_valid(vector<int>& t, const int p) const;
 		const int id;
 		const int arity;
 		vector<QVar*> scope;
@@ -392,7 +391,7 @@ namespace cp {
 		virtual ~QConVal() {}
 		arc get_arc() const { return arc(c, v); }
 		QVal get_vvalue() const { return QVal(v, a); }
-		int get_var_index()const { return c->index(v); }
+		int get_var_index()const { return c->index(*v); }
 		const QConVal& operator=(const QConVal& rhs);
 
 		friend std::ostream& operator<< (std::ostream &os, QConVal &cval) {

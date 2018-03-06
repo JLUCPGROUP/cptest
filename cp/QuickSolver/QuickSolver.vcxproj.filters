@@ -24,6 +24,18 @@
     <ClCompile Include="BacktrackingSearch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="MAC3bit.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="lMaxRPC_bit_rm.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MAC3rm.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MAC3.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="BMPath.xml">

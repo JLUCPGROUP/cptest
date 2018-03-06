@@ -25,48 +25,61 @@ namespace  cp {
 			v->copy_level(src, dest);
 	}
 
-	vector<QVar*> BacktrackingSearch::get_neighbor(QVar* v) {
+	vector<QVar*> BacktrackingSearch::get_neighbor(const QVar& v) {
 		unordered_set<QVar*> vs;
-		for (auto c : subscription[v])
+		for (auto c : subscription[v.id])
 			for (auto x : c->scope)
-				if (x != v)
+				if (x->id != v.id)
 					vs.insert(x);
 
 		return vector<QVar*>(vs.begin(), vs.end());
 	}
 
-	BacktrackingSearch::BacktrackingSearch(HModel* h) :
-		max_arity(h->max_arity()),
-		max_dom_size(h->max_domain_size()),
-		max_bitDom_size(ceil(float(h->max_domain_size()) / BITSIZE)),
-		num_vars(h->vars.size()),
-		num_tabs(h->tabs.size()),
-		top_(0),
-		tmp_(h->vars.size() + 1) {
+	BacktrackingSearch::BacktrackingSearch(const HModel& h) :
+		max_arity(h.max_arity()),
+		max_dom_size(h.max_domain_size()),
+		max_bitDom_size(ceil(float(h.max_domain_size()) / BITSIZE)),
+		num_vars(h.vars.size()),
+		num_tabs(h.tabs.size()),
+		tmp_(h.vars.size() + 1),
+		num_cva(num_tabs*max_dom_size*max_arity) {
 
 		vars.reserve(num_vars);
 		tabs.reserve(num_tabs);
-		neibor_vars.resize(num_vars);
+		subscription.resize(num_tabs);
+		neighborhood.resize(num_vars);
 
-		for (auto hv : h->vars) {
-			QVar *v = new QVar(hv);
+		for (auto hv : h.vars) {
+			auto*v = new QVar(hv);
 			v->runtime(num_vars);
 			vars.push_back(v);
 		}
 
-		for (auto ht : h->tabs) {
-			QTab *t = new QTab(ht, get_scope(ht));
+		for (auto ht : h.tabs) {
+			QTab *t = new QTab(ht, get_scope(*ht));
 			tabs.push_back(t);
 		}
 
-		for (auto t : tabs)
+		for (const auto t : tabs)
 			for (auto v : t->scope)
-				subscription[v].push_back(t);
+				subscription[v->id].push_back(t);
 
-		for (auto v : vars) {
-			neighborhood[v] = get_neighbor(v);
-			neibor_vars[v->id] = neighborhood[v];
+
+		//初始化约束查找矩阵
+		neibor_matrix.resize(num_vars, vector<vector<QTab*>>(num_vars, vector<QTab*>()));
+		for (const auto c : tabs) {
+			neibor_matrix[c->scope[0]->id][c->scope[1]->id].push_back(c);
+			neibor_matrix[c->scope[1]->id][c->scope[0]->id].push_back(c);
 		}
+		//for (auto v : vars) {
+		//	neighborhood[v->id] = get_neighbor(*v);
+		//	//neibor_vars[v->id] = neighborhood[v->id];
+		//}
+		for (const auto x : vars)
+			for (const auto y : vars)
+				if ((x != y) && !neibor_matrix[x->id][y->id].empty())
+					neighborhood[x->id].push_back(y);
+
 
 		con_stamp.resize(num_tabs, 0);
 		var_stamp.resize(num_tabs, 0);
@@ -74,6 +87,7 @@ namespace  cp {
 		q_.initial(num_vars);
 		tmp_tuple_.resize(max_arity);
 		Exclude(tmp_tuple_);
+
 
 		I_.initial(h);
 	}
@@ -85,22 +99,28 @@ namespace  cp {
 			delete t;
 	}
 
-	vector<QVar*> BacktrackingSearch::get_scope(HTab* t) {
-		vector<QVar*> tt(t->scope.size());
-		for (int i = 0; i < t->scope.size(); ++i)
-			tt[i] = vars[t->scope[i]->id];
+	int BacktrackingSearch::get_QConVal_index(const QConVal& c_val) const {
+		return  c_val.c->id * max_arity * max_dom_size + c_val.get_var_index() * max_dom_size + c_val.a;
+	}
+
+	int BacktrackingSearch::get_QConVal_index(const QTab& c, const QVar& v, const int a) const {
+		return  c.id * max_arity * max_dom_size + c.index(v) * max_dom_size + a;
+	}
+
+	int BacktrackingSearch::get_QConVal_index(const QTab& c, const int v_idx, const int a) const {
+		return  c.id * max_arity * max_dom_size + v_idx * max_dom_size + a;
+	}
+
+	vector<QVar*> BacktrackingSearch::get_scope(const HTab& t) {
+		vector<QVar*> tt(t.scope.size());
+		for (int i = 0; i < t.scope.size(); ++i)
+			tt[i] = vars[t.scope[i]->id];
 		return tt;
 	}
-	//void BacktrackingSearch::insert(QVar* v, const int p) {
-	//	q_.push(v, p);
-	//	++time;
-	//	var_stamp[v->id] = time;
-	//}
 
 	void BacktrackingSearch::insert(QVar& v, const int p) {
 		q_.push(v, p);
-		++time;
-		var_stamp[v.id] = time;
+		var_stamp[v.id] = ++time;
 	}
 
 	SearchStatistics BacktrackingSearch::statistics() const {
@@ -126,7 +146,9 @@ namespace  cp {
 			}
 
 			QVal v_a = select_QVal(varh, valh, top_);
-			//cout << "=" << v_a << endl;
+			//cout << "---------------------------" << endl;
+			//cout << "push: " << v_a << endl;
+			//cout << "---------------------------" << endl;
 			top_ = new_level();
 			I_.push(v_a);
 			++ss_.num_positives;
@@ -144,7 +166,9 @@ namespace  cp {
 
 			while (!consistent_ && !I_.empty()) {
 				v_a = I_.pop();
-				//cout << "!" << v_a << endl;
+				//cout << "---------------------------" << endl;
+				//cout << "pop:  " << v_a << endl;
+				//cout << "---------------------------" << endl;
 				top_ = back_level();
 				v_a.v->remove_value(v_a.a, top_);
 				++ss_.num_negatives;
@@ -163,7 +187,7 @@ namespace  cp {
 
 	QVal BacktrackingSearch::select_QVal(const Heuristic::Var varh, const Heuristic::Val valh, const int p) {
 		QVar* v = select_QVar(varh, p);
-		const int a = select_value(v, valh, p);
+		const int a = select_value(*v, valh, p);
 		QVal val(v, a);
 		return val;
 	}
@@ -174,7 +198,7 @@ namespace  cp {
 		switch (varh) {
 		case Heuristic::VRH_DOM_MIN: {
 			for (auto v : vars)
-				if (!I_.assigned(v))
+				if (!I_.assigned(*v))
 					if (v->size(p) < min_size) {
 						min_size = v->size(p);
 						var = v;
@@ -186,38 +210,69 @@ namespace  cp {
 		case Heuristic::VRH_VWDEG: break;
 		case Heuristic::VRH_DOM_DEG_MIN: {
 			for (auto v : vars)
-				if (!I_.assigned(v)) {
+				if (!I_.assigned(*v)) {
 					int dom_deg;
-					if (neighborhood[v].empty())
+					if (neighborhood[v->id].empty())
 						dom_deg = -1;
 					else
-						dom_deg = v->size(p) / neighborhood[v].size();
+						dom_deg = v->size(p) / neighborhood[v->id].size();
 					if (dom_deg < min_size) {
 						min_size = dom_deg;
 						var = v;
 					}
 				}
 		}return var;
+		case Heuristic::VRH_DOM_DDEG_MIN: {
+			for (auto x : vars) {
+				if (!I_.assigned(*x)) {
+					const auto cur_size = double(x->size(p));
+					if (cur_size == 1)
+						return x;
+
+					double ddeg = 0;
+					double d_ddeg;
+					for (auto c : subscription[x->id]) {
+						double cnt = 0;
+						for (auto y : c->scope) {
+							if (y != x) {
+								if (!I_.assigned(*y)) {
+									ddeg++;
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 		case Heuristic::VRH_DOM_WDEG_MIN: {
 			for (auto x : vars) {
-				if (!I_.assigned(x)) {
+				if (!I_.assigned(*x)) {
+					const auto cur_size = double(x->size(p));
+					if (cur_size == 1)
+						return x;
+
 					double x_w = 0.0;
 					double x_dw;
 
-					for (auto c : subscription[x]) {
+					for (auto c : subscription[x->id]) {
 						int cnt = 0;
-						for (auto y : c->scope)
-							if (!I_.assigned(y))
-								++cnt;
-						if (cnt > 1)
-							x_w += con_weight[c->id];
+						for (auto y : c->scope) {
+							if (x != y && !I_.assigned(*y)) {
+								x_w += con_weight[c->id];
+								break;
+							}
+						}
+						//if (!I_.assigned(*y))
+						//	++cnt;
+					//if (cnt > 1)
+					//	x_w += con_weight[c->id];
 					}
 
-					if (x->size(p) == 1 || x_w == 0)
-						//x_dw = -1;
+					if (!x_w)
 						return x;
 					else
-						x_dw = x->size(p) / x_w;
+						x_dw = cur_size / x_w;
 
 					if (x_dw < min_size) {
 						min_size = x_dw;
@@ -233,11 +288,11 @@ namespace  cp {
 		return var;
 	}
 
-	int BacktrackingSearch::select_value(QVar* v, const Heuristic::Val valh, const int p) {
+	int BacktrackingSearch::select_value(const QVar& v, const Heuristic::Val valh, const int p) {
 		int val = -1;
 		switch (valh) {
 		case Heuristic::VLH_MIN:
-			val = v->head(p);
+			val = v.head(p);
 			break;
 		case Heuristic::VLH_MIN_DOM: break;
 		case Heuristic::VLH_MIN_INC: break;
@@ -321,95 +376,7 @@ namespace  cp {
 	//}
 	////////////////////////////////////////////////////////////////////////////////
 
-	MAC3bit::MAC3bit(HModel* h) :BacktrackingSearch(h) {
-		const int n = num_tabs * max_dom_size*max_arity;
-		bitSup_ = new u64*[n];
-		for (size_t i = 0; i < n; i++)
-			bitSup_[i] = new u64[max_bitDom_size]();
 
-		for (QTab* c : tabs) {
-			for (auto t : c->tuples) {
-				const int index[] = { get_QConVal_index(*c,0, t[0]), get_QConVal_index(*c, 1, t[1]) };
-				const BitIndex idx[] = { GetBitIdx(t[0]), GetBitIdx(t[1]) };
-				bitSup_[index[0]][idx[1].x] |= U64_MASK1[idx[1].y];
-				bitSup_[index[1]][idx[0].x] |= U64_MASK1[idx[0].y];
-			}
-		}
-	}
-
-	MAC3bit::~MAC3bit() {
-		const int n = num_tabs * max_dom_size*max_arity;
-		for (int i = 0; i < n; ++i)
-			delete[] bitSup_[i];
-		delete[] bitSup_;
-	}
-
-	PropagationState MAC3bit::propagate(vector<QVar*>& x_evt, const int level) {
-		q_.clear();
-		ps_.level = level;
-		ps_.num_delete = 0;
-
-		for (auto v : x_evt)
-			insert(*v, level);
-		while (!q_.empty()) {
-			QVar* x = q_.pop(level);
-			//q_.pop_back();
-			for (QTab* c : subscription[x]) {
-				if (var_stamp[x->id] > con_stamp[c->id]) {
-					for (auto y : c->scope) {
-						if (!I_.assigned(y)) {
-							bool aa = false;
-							for (auto z : c->scope)
-								if ((z != x) && var_stamp[z->id] > con_stamp[c->id])
-									aa = true;
-
-							if ((y != x) || aa)
-								if (revise(*c, *y, level)) {
-									if (y->faild(level)) {
-										ps_.tab = c;
-										ps_.var = y;
-										++(con_weight[c->id]);
-										ps_.state = false;
-										return ps_;
-									}
-									insert(*y, level);
-								}
-						}
-					}
-					++time;
-					con_stamp[c->id] = time;
-				}
-			}
-		}
-
-		ps_.state = true;
-		return ps_;
-	}
-
-	bool MAC3bit::revise(QTab& c, QVar& v, const int level) {
-		++ss_.num_revisions;
-		const int num_elements = v.size(level);
-		int a = v.head(level);
-		while (a != Limits::INDEX_OVERFLOW) {
-			if (!seek_support(c, v, a, level)) {
-				v.remove_value(a, level);
-				//cout << "(" << v->id << ", " << a << ")" << endl;
-				++ps_.num_delete;
-			}
-			a = v.next(a, level);
-		}
-		return num_elements != v.size(level);
-	}
-
-	bool MAC3bit::seek_support(QTab& c, QVar& v, const int a, const int p) const {
-		const int idx = get_QConVal_index(c, v, a);
-		for (QVar* y : c.scope)
-			if (y->id != v.id)
-				for (int i = 0; i < y->num_bit; ++i)
-					if (bitSup_[idx][i] & y->bitDom(p)[i])
-						return true;
-		return false;
-	}
 
 	//////////////////////////////////////////////////////////////////////////////
 
@@ -501,7 +468,7 @@ namespace  cp {
 	//		neibor_matrix[c->scope[1]->id][c->scope[0]->id] = c;
 	//	}
 
-	//	pc_nei_.resize(vars.size(), vector<vector<QVar*>>(vars.size()));
+	//	common_neibor_.resize(vars.size(), vector<vector<QVar*>>(vars.size()));
 	//	set<QVar*> vars_map;
 	//	vector<bool> vars_in(vars.size(), false);
 	//	for (auto x : vars) {
@@ -510,7 +477,7 @@ namespace  cp {
 	//				if (neibor_matrix[x->id][z->id] != nullptr&&neibor_matrix[y->id][z->id]) {
 	//					if (!vars_in[z->id]) {
 	//						vars_in[z->id] = true;
-	//						pc_nei_[x->id][y->id].push_back(z);
+	//						common_neibor_[x->id][y->id].push_back(z);
 	//					}
 	//				}
 	//			}
@@ -644,7 +611,7 @@ namespace  cp {
 //	}
 //
 //	bool lMaxRPC_bit_rm::search_pc_wit(QVar* const i, const int a, QVar* j, const int b, const int p) {
-//		for (auto k : pc_nei_[i->id][j->id]) {
+//		for (auto k : common_neibor_[i->id][j->id]) {
 //			bool maxRPCsupport = false;
 //			const auto c_ik = neibor_matrix[i->id][k->id];
 //			const auto c_jk = neibor_matrix[j->id][k->id];
@@ -672,7 +639,7 @@ namespace  cp {
 //			int PCWitness = true;
 //			const auto b_idx = GetBitIdx(b);
 //			if (bitSup_[idx1][b_idx.x] | U64_MASK1[b_idx.y]) {
-//				for (auto k : pc_nei_[i->id][j->id]) {
+//				for (auto k : common_neibor_[i->id][j->id]) {
 //					if (!have_PC_wit(i, a, j, b, k, p)) {
 //						PCWitness = false;
 //						break;

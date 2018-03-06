@@ -7,7 +7,7 @@ namespace cp {
 		capacity(v->vals.size()),
 		limit(capacity & MOD_MASK),
 		num_bit(ceil(float(capacity) / BITSIZE)),
-		vals(v->vals),
+		vals(v->anti_map),
 		size_tmp(v->vals.size()) {
 		bit_tmp_ = new u64[num_bit];
 		memset(bit_tmp_, ULLONG_MAX, num_bit * sizeof(u64));
@@ -73,11 +73,11 @@ namespace cp {
 	}
 
 	void QVar::next_value(int& a, const int p) const {
-		const auto index = GetBitIdx(a++);
+		const auto index = GetBitIdx(a);
 		const u64 b = (bit_doms_[p][index.x] >> index.y) >> 1;
 
 		if (b) {
-			a = a + FirstOne(b);
+			a = a + 1 + FirstOne(b);
 			return;
 		}
 
@@ -165,15 +165,15 @@ namespace cp {
 		return os;
 	}
 	///////////////////////////////////////////////////////////////////////
-	void assignments_stack::initial(HModel * m) {
-		max_size_ = m->vars.size();
+	void assignments_stack::initial(const HModel& m) {
+		max_size_ = m.vars.size();
 		//qvals_ = new QVal[m->vars.size()];
 		//v_=new int[m->vars.size()];
-		qvals_.reserve(m->vars.size());
-		v_.resize(m->vars.size(), -1);
+		qvals_.reserve(m.vars.size());
+		v_.resize(m.vars.size(), -1);
 	}
 
-	void assignments_stack::push(QVal & v_a) {
+	void assignments_stack::push(const QVal & v_a) {
 		qvals_.push_back(v_a);
 		v_[v_a.v->id] = v_a.a;
 	}
@@ -202,8 +202,12 @@ namespace cp {
 		return v_[v] != Limits::INDEX_OVERFLOW;
 	}
 
-	bool assignments_stack::assigned(const QVar* v) const {
-		return v_[v->id] != Limits::INDEX_OVERFLOW;
+	//bool assignments_stack::assigned(const QVar* v) const {
+	//	return v_[v->id] != Limits::INDEX_OVERFLOW;
+	//}
+
+	bool assignments_stack::assigned(const QVar& v) const {
+		return v_[v.id] != Limits::INDEX_OVERFLOW;
 	}
 
 	bool assignments_stack::solution(vector<int>& sol) const {
@@ -280,7 +284,7 @@ namespace cp {
 		del();
 	}
 
-	void vars_heap::push(QVar &  v, const int p) {
+	void vars_heap::push(QVar& v, const int p) {
 		insert(v, p);
 	}
 
@@ -300,7 +304,7 @@ namespace cp {
 		delete[] position_;
 	}
 
-	void vars_heap::insert(QVar  &  v, const int p) {
+	void vars_heap::insert(QVar& v, const int p) {
 		if (position_[v.id] >= 0)
 			filter_up(position_[v.id], p);
 		else {
@@ -324,8 +328,8 @@ namespace cp {
 		cur_size_ = 0;
 	}
 
-	bool vars_heap::compare(QVar const & a, QVar const & b, const int p) {
-		return a.size(p) < b.size(p);
+	bool vars_heap::compare(const QVar& a, const QVar& b, const int p) {
+		return a.size(p) <= b.size(p);
 	}
 
 	void vars_heap::filter_up(const int start, const int p) const {
@@ -333,7 +337,7 @@ namespace cp {
 		int i = (j - 1) / 2;
 		QVar* v = vs_[j];
 		while (j > 0) {
-			if (compare(*(vs_[j]), *v, p)) {
+			if (compare(*(vs_[i]), *v, p)) {
 				break;
 			}
 			else {
@@ -406,17 +410,17 @@ namespace cp {
 		Exclude(t);
 	}
 
-	void QTab::get_first_valid_tuple(QVar* v, const int a, vector<int>& t, const int p) {
+	void QTab::get_first_valid_tuple(const QVar& v, const int a, vector<int>& t, const int p) const {
 		for (int i = 0; i < arity; ++i)
-			if (scope[i] != v)
+			if (scope[i]->id != v.id)
 				t[i] = scope[i]->head(p);
 			else
 				t[i] = a;
 	}
 
-	void QTab::get_next_valid_tuple(QVar* v, const int a, vector<int>& t, const int p) {
+	void QTab::get_next_valid_tuple(const QVar& v, const int a, vector<int>& t, const int p) const {
 		for (int i = arity - 1; i >= 0; --i) {
-			if (scope[i] != v) {
+			if (scope[i]->id != v.id) {
 				if (scope[i]->next(t[i], p) == Limits::INDEX_OVERFLOW) {
 					t[i] = scope[i]->head(p);
 				}
@@ -429,26 +433,27 @@ namespace cp {
 		Exclude(t);
 	}
 
-	int QTab::index(QVar* v) const {
-		for (int i = scope.size() - 1; i >= 0; --i)
-			if (scope[i] == v)
-				return i;
-		return Limits::INDEX_OVERFLOW;
-	}
+	//int QTab::index(QVar* v) const {
+	//	for (int i = scope.size() - 1; i >= 0; --i)
+	//		if (scope[i] == v)
+	//			return i;
+	//	return Limits::INDEX_OVERFLOW;
+	//}
 
-	int QTab::index(QVar& v) const {
+	int QTab::index(const QVar & v) const {
 		for (int i = scope.size() - 1; i >= 0; --i)
 			if (scope[i]->id == v.id)
 				return i;
+		cout << "get var index error!!" << endl;
 		return Limits::INDEX_OVERFLOW;
 	}
 
-	bool QTab::is_valid(vector<int>& t, const int p) {
+	bool QTab::is_valid(vector<int>& t, const int p) const {
 		if (!Existed(t))
 			return false;
 
 		for (QVar* v : scope)
-			if (!v->have(t[index(v)], p))
+			if (!v->have(t[index(*v)], p))
 				return false;
 		return true;
 	}

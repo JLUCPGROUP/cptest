@@ -51,7 +51,7 @@ public:
 	 * \param[in] i_file_name	The name of file.
 	 * \param[in] i_type		The type of file, path file or benchmark file.
 	 */
-	XBuilder(string file_name, const XmlReaderType type);
+	XBuilder(const string& file_name, const XmlReaderType type);
 	virtual ~XBuilder();
 
 	/**
@@ -112,7 +112,7 @@ private:
 
 	//int getMaxArity();
 	void del() const;
-	bool initial(const string s);
+	bool initial(const string& s);
 
 };
 
