@@ -1,7 +1,7 @@
 ﻿#include "BacktrackingSearch.h"
 namespace cp {
-	MAC3bit::MAC3bit(const HModel& h) :
-	BacktrackingSearch(h){
+	MAC3bit::MAC3bit(const HModel& h, const bool backtrackable) :
+	BacktrackingSearch(h, backtrackable){
 		bitSup_ = new u64*[num_cva];
 		for (size_t i = 0; i < num_cva; i++)
 			bitSup_[i] = new u64[max_bitDom_size]();
@@ -38,7 +38,7 @@ namespace cp {
 					QVar* y = (c->scope[0] == x) ? c->scope[1] : c->scope[0];
 					const auto a = var_stamp[y->id] > con_stamp[c->id];
 					for (auto z : c->scope) {
-						if (!I_.assigned(*z)) {
+						if (!I.assigned(*z)) {
 							if ((z != x) || a) {
 								//cout << "revise: " << c->id << "," << z->id << endl;
 								if (revise(*c, *z, p)) {

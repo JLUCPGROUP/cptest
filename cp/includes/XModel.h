@@ -7,78 +7,299 @@
 #include <iostream>
 using namespace std;
 
-typedef unsigned u32;
-//typedef
-//typedef tuple<int, int> IntTuple;
-/**
-* \brief 表约束语义
-*/
-enum Semantices {
-	SEM_CONFLICT = 0,		///<冲突
-	SEM_SUPPORT = 1		///<支持
-};
 
 namespace cp {
+	typedef unsigned long long u64;
+	typedef unsigned u32;
 
-class XDom {
-public:
-	const int id;
-	vector<int> vals;
-	XDom(const int id, const int num_vals, char* val_str);
-	~XDom();
-	void show();
-};
+	const u32 U32_UMASK1[32] = {
+		0x80000000, 0x40000000, 0x20000000, 0x10000000,
+		0x08000000, 0x04000000, 0x02000000, 0x01000000,
+		0x00800000, 0x00400000, 0x00200000, 0x00100000,
+		0x00080000, 0x00040000, 0x00020000, 0x00010000,
+		0x00008000, 0x00004000, 0x00002000, 0x00001000,
+		0x00000800, 0x00000400, 0x00000200, 0x00000100,
+		0x00000080, 0x00000040, 0x00000020, 0x00000010,
+		0x00000008, 0x00000004, 0x00000002, 0x00000001
+	};
 
-class XVar {
-public:
-	const int id;
-	int xdom_id = -1;
-	XVar::XVar(const int id, char* xdom_str);
-	void show() const;
-	~XVar();
-};
+	const u32 U32_UMASK0[32] = {
+		0x7FFFFFFF, 0xBFFFFFFF, 0xDFFFFFFF, 0xEFFFFFFF,
+		0xF7FFFFFF, 0xFBFFFFFF, 0xFDFFFFFF, 0xFEFFFFFF,
+		0xFF7FFFFF, 0xFFBFFFFF, 0xFFDFFFFF, 0xFFEFFFFF,
+		0xFFF7FFFF, 0xFFFBFFFF, 0xFFFDFFFF, 0xFFFEFFFF,
+		0xFFFF7FFF, 0xFFFFBFFF, 0xFFFFDFFF, 0xFFFFEFFF,
+		0xFFFFF7FF, 0xFFFFFBFF, 0xFFFFFDFF, 0xFFFFFEFF,
+		0xFFFFFF7F, 0xFFFFFFBF, 0xFFFFFFDF, 0xFFFFFFEF,
+		0xFFFFFFF7, 0xFFFFFFFB, 0xFFFFFFFD, 0xFFFFFFFE
+	};
 
-class XRel {
-public:
-	const int id;
-	const int arity;
-	const int size;
-	Semantices semantics;
-	vector<vector<int>> tuples;
-	XRel(const int id, const int arity, const int size, const char* sem, char* ts_str);
-	~XRel();
-	void show();
-protected:
-	char* ts_str_;
-	void generate_tuples();
-};
+	//const u64 U64_MASK1[64] = {
+	//	0x8000000000000000, 0x4000000000000000, 0x2000000000000000, 0x1000000000000000,
+	//	0x0800000000000000, 0x0400000000000000, 0x0200000000000000, 0x0100000000000000,
+	//	0x0080000000000000, 0x0040000000000000, 0x0020000000000000, 0x0010000000000000,
+	//	0x0008000000000000, 0x0004000000000000, 0x0002000000000000, 0x0001000000000000,
+	//	0x0000800000000000, 0x0000400000000000, 0x0000200000000000, 0x0000100000000000,
+	//	0x0000080000000000, 0x0000040000000000, 0x0000020000000000, 0x0000010000000000,
+	//	0x0000008000000000, 0x0000004000000000, 0x0000002000000000, 0x0000001000000000,
+	//	0x0000000800000000, 0x0000000400000000, 0x0000000200000000, 0x0000000100000000,
+	//	0x0000000080000000, 0x0000000040000000, 0x0000000020000000, 0x0000000010000000,
+	//	0x0000000008000000, 0x0000000004000000, 0x0000000002000000, 0x0000000001000000,
+	//	0x0000000000800000, 0x0000000000400000, 0x0000000000200000, 0x0000000000100000,
+	//	0x0000000000080000, 0x0000000000040000, 0x0000000000020000, 0x0000000000010000,
+	//	0x0000000000008000, 0x0000000000004000, 0x0000000000002000, 0x0000000000001000,
+	//	0x0000000000000800, 0x0000000000000400, 0x0000000000000200, 0x0000000000000100,
+	//	0x0000000000000080, 0x0000000000000040, 0x0000000000000020, 0x0000000000000010,
+	//	0x0000000000000008, 0x0000000000000004, 0x0000000000000002, 0x0000000000000001,
+	//};
+	//
+	//const u64 U64_MASK0[64] = {
+	//	0x7FFFFFFFFFFFFFFF, 0xBFFFFFFFFFFFFFFF, 0xDFFFFFFFFFFFFFFF, 0xEFFFFFFFFFFFFFFF,
+	//	0xF7FFFFFFFFFFFFFF, 0xFBFFFFFFFFFFFFFF, 0xFDFFFFFFFFFFFFFF, 0xFEFFFFFFFFFFFFFF,
+	//	0xFF7FFFFFFFFFFFFF, 0xFFBFFFFFFFFFFFFF, 0xFFDFFFFFFFFFFFFF, 0xFFEFFFFFFFFFFFFF,
+	//	0xFFF7FFFFFFFFFFFF, 0xFFFBFFFFFFFFFFFF, 0xFFFDFFFFFFFFFFFF, 0xFFFEFFFFFFFFFFFF,
+	//	0xFFFF7FFFFFFFFFFF, 0xFFFFBFFFFFFFFFFF, 0xFFFFDFFFFFFFFFFF, 0xFFFFEFFFFFFFFFFF,
+	//	0xFFFFF7FFFFFFFFFF, 0xFFFFFBFFFFFFFFFF, 0xFFFFFDFFFFFFFFFF, 0xFFFFFEFFFFFFFFFF,
+	//	0xFFFFFF7FFFFFFFFF, 0xFFFFFFBFFFFFFFFF, 0xFFFFFFDFFFFFFFFF, 0xFFFFFFEFFFFFFFFF,
+	//	0xFFFFFFF7FFFFFFFF, 0xFFFFFFFBFFFFFFFF, 0xFFFFFFFDFFFFFFFF, 0xFFFFFFFEFFFFFFFF,
+	//	0xFFFFFFFF7FFFFFFF, 0xFFFFFFFFBFFFFFFF, 0xFFFFFFFFDFFFFFFF, 0xFFFFFFFFEFFFFFFF,
+	//	0xFFFFFFFFF7FFFFFF, 0xFFFFFFFFFBFFFFFF, 0xFFFFFFFFFDFFFFFF, 0xFFFFFFFFFEFFFFFF,
+	//	0xFFFFFFFFFF7FFFFF, 0xFFFFFFFFFFBFFFFF, 0xFFFFFFFFFFDFFFFF, 0xFFFFFFFFFFEFFFFF,
+	//	0xFFFFFFFFFFF7FFFF, 0xFFFFFFFFFFFBFFFF, 0xFFFFFFFFFFFDFFFF, 0xFFFFFFFFFFFEFFFF,
+	//	0xFFFFFFFFFFFF7FFF, 0xFFFFFFFFFFFFBFFF, 0xFFFFFFFFFFFFDFFF, 0xFFFFFFFFFFFFEFFF,
+	//	0xFFFFFFFFFFFFF7FF, 0xFFFFFFFFFFFFFBFF, 0xFFFFFFFFFFFFFDFF, 0xFFFFFFFFFFFFFEFF,
+	//	0xFFFFFFFFFFFFFF7F, 0xFFFFFFFFFFFFFFBF, 0xFFFFFFFFFFFFFFDF, 0xFFFFFFFFFFFFFFEF,
+	//	0xFFFFFFFFFFFFFFF7, 0xFFFFFFFFFFFFFFFB, 0xFFFFFFFFFFFFFFFD, 0xFFFFFFFFFFFFFFFE,
+	//};
+	const u64 U64_MASK1[64] = {
+		0x0000000000000001,0x0000000000000002,0x0000000000000004,0x0000000000000008,
+		0x0000000000000010,0x0000000000000020,0x0000000000000040,0x0000000000000080,
+		0x0000000000000100,0x0000000000000200,0x0000000000000400,0x0000000000000800,
+		0x0000000000001000,0x0000000000002000,0x0000000000004000,0x0000000000008000,
+		0x0000000000010000,0x0000000000020000,0x0000000000040000,0x0000000000080000,
+		0x0000000000100000,0x0000000000200000,0x0000000000400000,0x0000000000800000,
+		0x0000000001000000,0x0000000002000000,0x0000000004000000,0x0000000008000000,
+		0x0000000010000000,0x0000000020000000,0x0000000040000000,0x0000000080000000,
+		0x0000000100000000,0x0000000200000000,0x0000000400000000,0x0000000800000000,
+		0x0000001000000000,0x0000002000000000,0x0000004000000000,0x0000008000000000,
+		0x0000010000000000,0x0000020000000000,0x0000040000000000,0x0000080000000000,
+		0x0000100000000000,0x0000200000000000,0x0000400000000000,0x0000800000000000,
+		0x0001000000000000,0x0002000000000000,0x0004000000000000,0x0008000000000000,
+		0x0010000000000000,0x0020000000000000,0x0040000000000000,0x0080000000000000,
+		0x0100000000000000,0x0200000000000000,0x0400000000000000,0x0800000000000000,
+		0x1000000000000000,0x2000000000000000,0x4000000000000000,0x8000000000000000,
+	};
 
-class XCon {
-public:
-	const int id;
-	int rel_id = -1;
-	const int arity;
-	vector<int> scope;
-	XCon(const int id, char* rel_str, const int arity, char* scope_str);
-	void show();
-	~XCon();
-};
+	const u64 U64_MASK0[64] = {
+		0xFFFFFFFFFFFFFFFE,0xFFFFFFFFFFFFFFFD,0xFFFFFFFFFFFFFFFB,0xFFFFFFFFFFFFFFF7,
+		0xFFFFFFFFFFFFFFEF,0xFFFFFFFFFFFFFFDF,0xFFFFFFFFFFFFFFBF,0xFFFFFFFFFFFFFF7F,
+		0xFFFFFFFFFFFFFEFF,0xFFFFFFFFFFFFFDFF,0xFFFFFFFFFFFFFBFF,0xFFFFFFFFFFFFF7FF,
+		0xFFFFFFFFFFFFEFFF,0xFFFFFFFFFFFFDFFF,0xFFFFFFFFFFFFBFFF,0xFFFFFFFFFFFF7FFF,
+		0xFFFFFFFFFFFEFFFF,0xFFFFFFFFFFFDFFFF,0xFFFFFFFFFFFBFFFF,0xFFFFFFFFFFF7FFFF,
+		0xFFFFFFFFFFEFFFFF,0xFFFFFFFFFFDFFFFF,0xFFFFFFFFFFBFFFFF,0xFFFFFFFFFF7FFFFF,
+		0xFFFFFFFFFEFFFFFF,0xFFFFFFFFFDFFFFFF,0xFFFFFFFFFBFFFFFF,0xFFFFFFFFF7FFFFFF,
+		0xFFFFFFFFEFFFFFFF,0xFFFFFFFFDFFFFFFF,0xFFFFFFFFBFFFFFFF,0xFFFFFFFF7FFFFFFF,
+		0xFFFFFFFEFFFFFFFF,0xFFFFFFFDFFFFFFFF,0xFFFFFFFBFFFFFFFF,0xFFFFFFF7FFFFFFFF,
+		0xFFFFFFEFFFFFFFFF,0xFFFFFFDFFFFFFFFF,0xFFFFFFBFFFFFFFFF,0xFFFFFF7FFFFFFFFF,
+		0xFFFFFEFFFFFFFFFF,0xFFFFFDFFFFFFFFFF,0xFFFFFBFFFFFFFFFF,0xFFFFF7FFFFFFFFFF,
+		0xFFFFEFFFFFFFFFFF,0xFFFFDFFFFFFFFFFF,0xFFFFBFFFFFFFFFFF,0xFFFF7FFFFFFFFFFF,
+		0xFFFEFFFFFFFFFFFF,0xFFFDFFFFFFFFFFFF,0xFFFBFFFFFFFFFFFF,0xFFF7FFFFFFFFFFFF,
+		0xFFEFFFFFFFFFFFFF,0xFFDFFFFFFFFFFFFF,0xFFBFFFFFFFFFFFFF,0xFF7FFFFFFFFFFFFF,
+		0xFEFFFFFFFFFFFFFF,0xFDFFFFFFFFFFFFFF,0xFBFFFFFFFFFFFFFF,0xF7FFFFFFFFFFFFFF,
+		0xEFFFFFFFFFFFFFFF,0xDFFFFFFFFFFFFFFF,0xBFFFFFFFFFFFFFFF,0x7FFFFFFFFFFFFFFF,
+	};
 
-class XModel {
-public:
-	XModel() {};
-	~XModel();
-	vector<XDom*> doms;
-	vector<XVar*> vars;
-	vector<XRel*> rels;
-	vector<XCon*> cons;
-	void add(const int id, const int num_vals, char* val_str);
-	void add(const int id, char* xdom_id);
-	void add(const int id, const int arity, const int size, const char* sem, char* ts_str);
-	void add(const int id, char* rel_str, const int arity, char* scope_str);
-	void show();
-	//int max_domain_size;
-	//int max_arity;
-};
+	namespace Limits {
+		/**
+		* \brief 取值范围
+		*/
+		const int MIN_INTVAR_ID = 0x7fff7000;
+		const int MAX_INTVAR_ID = INT_MAX - 1;
+		const int MAX_OPT = INT_MIN & 0xffff7000 - 1;
+		const int MIN_OPT = INT_MIN + 1;
+		const int UNSIGNED_VAL = INT_MIN & 0xffff7000;
+		const int MIN_VAL = UNSIGNED_VAL + 1;
+		const int MAX_VAL = MIN_INTVAR_ID - 1;
+		const int INDEX_OVERFLOW = -1;
+		const int PRESENT = -1;
+		const int ABSENT = 0;
+	}
+
+	//64位
+	const int BITSIZE = 64;
+	const int DIV_BIT = 6;
+	const int MOD_MASK = 0x3f;
+	//32位
+	//const int BITSIZE = 32;
+	//const int DIV_BIT = 5;
+	//const int MOD_MASK = 0x1f;
+
+	namespace Heuristic {
+		enum Var {
+			VRH_LEX,
+			VRH_DOM_MIN,
+			VRH_VWDEG,
+			VRH_DOM_DEG_MIN,
+			VRH_DOM_DDEG_MIN,
+			VRH_DOM_WDEG_MIN
+		};
+
+		enum Val {
+			VLH_MIN,
+			VLH_MIN_DOM,
+			VLH_MIN_INC,
+			VLH_MAX_INC,
+			VLH_VWDEG
+		};
+
+		enum DecisionScheme {
+			DS_BI,
+			DS_NB
+		};
+	};
+
+	struct BitIndex {
+		int x;
+		int y;
+	};
+
+	//inline BitIndex GetBitIdx(const int idx) {
+	//	inline BitIndex GetBitIdx(const int idx) {
+
+	//	tuple<int, int> a;
+	//	get<0>(a) = idx >> DIV_BIT;
+	//	get<1>(a) = idx & MOD_MASK;
+	//	return BitIndex { idx >> DIV_BIT, idx & MOD_MASK };
+	//}
+//#define GetBitIdx(idx) BitIndex { idx >> DIV_BIT, idx & MOD_MASK }
+	inline BitIndex GetBitIdx(const int idx) {
+		return BitIndex{ idx >> DIV_BIT, idx & MOD_MASK };
+	}
+
+	//inline tuple<int, int> GetBitIdx(const int idx) {
+	//	tuple<int, int> a;
+	//	get<0>(a) = idx >> DIV_BIT;
+	//	get<1>(a) = idx & MOD_MASK;
+	//	return a;
+	//}
+	inline int GetValue(const int i, const int j) {
+		return  (i << DIV_BIT) + j;
+	}
+
+	typedef vector<u64> bitSetVector;
+	inline int FirstOne(const u32 UseMask) {
+		register u32 index = UseMask;
+		//将第一个为1位的低位都置1，其它位都置0
+		index = (index - 1)  &  ~index;
+		//得到有多少为1的位
+		index = index & 0x55555555 + (index >> 1) & 0x55555555;
+		index = index & 0x33333333 + (index >> 2) & 0x33333333;
+		index = index & 0x0F0F0F0F + (index >> 4) & 0x0F0F0F0F;
+		index = index & 0xFF + (index & 0xFF00 >> 8) + (index & 0xFF0000 >> 16) + (index & 0xFF000000 >> 24);
+		//得到位数,如果为32则表示全0
+		return index;
+	}
+
+	inline int FirstOne(const u64 UseMask) {
+		register u64 index = UseMask;
+		//将第一个为1位的低位都置1，其它位都置0
+		index = (index - 1)  &  ~index;
+		//得到有多少为1的位
+		index = (index & 0x5555555555555555) + ((index >> 1) & 0x5555555555555555);
+		index = (index & 0x3333333333333333) + ((index >> 2) & 0x3333333333333333);
+		index = (index & 0x0F0F0F0F0F0F0F0F) + ((index >> 4) & 0x0F0F0F0F0F0F0F0F);
+		index = (index & 0x00FF00FF00FF00FF) + ((index >> 8) & 0x00FF00FF00FF00FF);
+		index = (index & 0x0000ffff0000ffff) + ((index >> 16) & 0x0000ffff0000ffff);
+		index = (index & 0xFFFFFFFF) + ((index & 0xFFFFFFFF00000000) >> 32);
+		//得到位数,如果为64则表示全0
+		return int(index);
+	}
+	
+	inline int Count(u64 num) {
+		const u64 M1 = 0x5555555555555555;
+		const u64 M2 = 0x3333333333333333;
+		const u64 M4 = 0x0F0F0F0F0F0F0F0F;
+		const u64 M8 = 0x00FF00FF00FF00FF;
+		const u64 M16 = 0x0000ffff0000ffff;
+		const u64 M32 = 0x00000000FFFFFFFF;
+
+		num = (num & M1) + ((num >> 1) & M1);
+		num = (num & M2) + ((num >> 2) & M2);
+		num = (num & M4) + ((num >> 4) & M4);
+		num = (num & M8) + ((num >> 8) & M8);
+		num = (num & M16) + ((num >> 16) & M16);
+		num = (num & M32) + ((num >> 32) & M32);
+
+		return num;
+	}
+
+
+	/**
+	* \brief 表约束语义
+	*/
+	enum Semantices {
+		SEM_CONFLICT = 0,		///<冲突
+		SEM_SUPPORT = 1		///<支持
+	};
+	class XDom {
+	public:
+		const int id;
+		vector<int> vals;
+		XDom(const int id, const int num_vals, char* val_str);
+		~XDom();
+		void show();
+	};
+
+	class XVar {
+	public:
+		const int id;
+		int xdom_id = -1;
+		XVar::XVar(const int id, char* xdom_str);
+		void show() const;
+		~XVar();
+	};
+
+	class XRel {
+	public:
+		const int id;
+		const int arity;
+		const int size;
+		Semantices semantics;
+		vector<vector<int>> tuples;
+		XRel(const int id, const int arity, const int size, const char* sem, char* ts_str);
+		~XRel();
+		void show();
+	protected:
+		char* ts_str_;
+		void generate_tuples();
+	};
+
+	class XCon {
+	public:
+		const int id;
+		int rel_id = -1;
+		const int arity;
+		vector<int> scope;
+		XCon(const int id, char* rel_str, const int arity, char* scope_str);
+		void show();
+		~XCon();
+	};
+
+	class XModel {
+	public:
+		XModel() {};
+		~XModel();
+		vector<XDom*> doms;
+		vector<XVar*> vars;
+		vector<XRel*> rels;
+		vector<XCon*> cons;
+		void add(const int id, const int num_vals, char* val_str);
+		void add(const int id, char* xdom_id);
+		void add(const int id, const int arity, const int size, const char* sem, char* ts_str);
+		void add(const int id, char* rel_str, const int arity, char* scope_str);
+		void show();
+		//int max_domain_size;
+		//int max_arity;
+	};
 }
 

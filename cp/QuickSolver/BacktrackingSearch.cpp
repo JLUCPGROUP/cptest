@@ -35,14 +35,14 @@ namespace  cp {
 		return vector<QVar*>(vs.begin(), vs.end());
 	}
 
-	BacktrackingSearch::BacktrackingSearch(const HModel& h) :
+	BacktrackingSearch::BacktrackingSearch(const HModel& h, const bool backtrackable) :
 		max_arity(h.max_arity()),
 		max_dom_size(h.max_domain_size()),
 		max_bitDom_size(ceil(float(h.max_domain_size()) / BITSIZE)),
 		num_vars(h.vars.size()),
 		num_tabs(h.tabs.size()),
-		tmp_(h.vars.size() + 1),
-		num_cva(num_tabs*max_dom_size*max_arity) {
+		num_cva(num_tabs*max_dom_size*max_arity),
+		tmp_(h.vars.size() + 1) {
 
 		vars.reserve(num_vars);
 		tabs.reserve(num_tabs);
@@ -51,9 +51,10 @@ namespace  cp {
 
 		for (auto hv : h.vars) {
 			auto*v = new QVar(hv);
-			v->runtime(num_vars);
 			vars.push_back(v);
 		}
+		if (backtrackable)
+			enable_backtracking();
 
 		for (auto ht : h.tabs) {
 			QTab *t = new QTab(ht, get_scope(*ht));
@@ -80,7 +81,6 @@ namespace  cp {
 				if ((x != y) && !neibor_matrix[x->id][y->id].empty())
 					neighborhood[x->id].push_back(y);
 
-
 		con_stamp.resize(num_tabs, 0);
 		var_stamp.resize(num_tabs, 0);
 		con_weight.resize(num_tabs, 1);
@@ -88,8 +88,7 @@ namespace  cp {
 		tmp_tuple_.resize(max_arity);
 		Exclude(tmp_tuple_);
 
-
-		I_.initial(h);
+		I.initial(h);
 	}
 
 	BacktrackingSearch::~BacktrackingSearch() {
@@ -99,16 +98,38 @@ namespace  cp {
 			delete t;
 	}
 
-	int BacktrackingSearch::get_QConVal_index(const QConVal& c_val) const {
+	u64 BacktrackingSearch::get_QConVal_index(const QConVal& c_val) const {
 		return  c_val.c->id * max_arity * max_dom_size + c_val.get_var_index() * max_dom_size + c_val.a;
 	}
 
-	int BacktrackingSearch::get_QConVal_index(const QTab& c, const QVar& v, const int a) const {
+	u64 BacktrackingSearch::get_QConVal_index(const QTab& c, const QVar& v, const int a) const {
 		return  c.id * max_arity * max_dom_size + c.index(v) * max_dom_size + a;
 	}
 
-	int BacktrackingSearch::get_QConVal_index(const QTab& c, const int v_idx, const int a) const {
+	u64 BacktrackingSearch::get_QConVal_index(const QTab& c, const int v_idx, const int a) const {
 		return  c.id * max_arity * max_dom_size + v_idx * max_dom_size + a;
+	}
+
+	void BacktrackingSearch::enable_backtracking() {
+		tmp_ = num_vars + 1;
+		if (!backtrackable_) {
+			backtrackable_ = true;
+			for (auto v : vars)
+				v->enable_backtracking(num_vars);
+		}
+	}
+
+	void BacktrackingSearch::disable_backtracking() {
+		if (backtrackable_) {
+			backtrackable_ = false;
+			for (auto v : vars)
+				v->disable_backtracking();
+		}
+	}
+
+	void BacktrackingSearch::show(const int p) {
+		for (auto x : vars)
+			x->show(p);
 	}
 
 	vector<QVar*> BacktrackingSearch::get_scope(const HTab& t) {
@@ -127,7 +148,7 @@ namespace  cp {
 		return ss_;
 	}
 
-	SearchStatistics BacktrackingSearch::solve(const Heuristic::Var varh, const Heuristic::Val valh, const int time_limits) {
+	SearchStatistics BacktrackingSearch::binary_search(const Heuristic::Var varh, const Heuristic::Val valh, const int time_limits) {
 		Timer t;
 		vector<QVar*> x_evt;
 		bool consistent_ = propagate(vars, 0).state;
@@ -150,31 +171,39 @@ namespace  cp {
 			//cout << "push: " << v_a << endl;
 			//cout << "---------------------------" << endl;
 			top_ = new_level();
-			I_.push(v_a);
+			I.push(v_a);
 			++ss_.num_positives;
-			v_a.v->reduce_to(v_a.a, top_);
-			x_evt.push_back(v_a.v);
-			consistent_ = propagate(x_evt, top_).state;
-			x_evt.clear();
-			//I.update_model_assigned();
-			if (consistent_&&I_.full()) {
-				cout << I_ << endl;
+
+			//选出的变量论域大小为1
+			if (v_a.v->size(top_) != 1 && consistent_) {
+				//++ss_.num_positives;
+				v_a.v->reduce_to(v_a.a, top_);
+				x_evt.push_back(v_a.v);
+				consistent_ = propagate(x_evt, top_).state;
+				x_evt.clear();
+			}
+
+			if (consistent_&&I.full()) {
+				cout << I << endl;
 				finished_ = true;
 				//++sol_count_;
 				//consistent_ = false;
 			}
 
-			while (!consistent_ && !I_.empty()) {
-				v_a = I_.pop();
+			while (!consistent_ && !I.empty()) {
+				v_a = I.pop();
 				//cout << "---------------------------" << endl;
 				//cout << "pop:  " << v_a << endl;
 				//cout << "---------------------------" << endl;
 				top_ = back_level();
-				v_a.v->remove_value(v_a.a, top_);
-				++ss_.num_negatives;
-				x_evt.push_back(v_a.v);
-				consistent_ = v_a.v->size(top_) && propagate(x_evt, top_).state;
-				x_evt.clear();
+				//选出的变量论域大小不为1
+				if (v_a.v->size(top_) != 1) {
+					v_a.v->remove_value(v_a.a, top_);
+					++ss_.num_negatives;
+					x_evt.push_back(v_a.v);
+					consistent_ = v_a.v->size(top_) && propagate(x_evt, top_).state;
+					x_evt.clear();
+				}
 			}
 
 			if (!consistent_)
@@ -198,19 +227,19 @@ namespace  cp {
 		switch (varh) {
 		case Heuristic::VRH_DOM_MIN: {
 			for (auto v : vars)
-				if (!I_.assigned(*v))
+				if (!I.assigned(*v))
 					if (v->size(p) < min_size) {
 						min_size = v->size(p);
 						var = v;
 					}
 		} return var;
 		case Heuristic::VRH_LEX:
-			var = vars[I_.size() + 1];
+			var = vars[I.size() + 1];
 			break;
 		case Heuristic::VRH_VWDEG: break;
 		case Heuristic::VRH_DOM_DEG_MIN: {
 			for (auto v : vars)
-				if (!I_.assigned(*v)) {
+				if (!I.assigned(*v)) {
 					int dom_deg;
 					if (neighborhood[v->id].empty())
 						dom_deg = -1;
@@ -224,7 +253,7 @@ namespace  cp {
 		}return var;
 		case Heuristic::VRH_DOM_DDEG_MIN: {
 			for (auto x : vars) {
-				if (!I_.assigned(*x)) {
+				if (!I.assigned(*x)) {
 					const auto cur_size = double(x->size(p));
 					if (cur_size == 1)
 						return x;
@@ -235,7 +264,7 @@ namespace  cp {
 						double cnt = 0;
 						for (auto y : c->scope) {
 							if (y != x) {
-								if (!I_.assigned(*y)) {
+								if (!I.assigned(*y)) {
 									ddeg++;
 									break;
 								}
@@ -247,7 +276,7 @@ namespace  cp {
 		}
 		case Heuristic::VRH_DOM_WDEG_MIN: {
 			for (auto x : vars) {
-				if (!I_.assigned(*x)) {
+				if (!I.assigned(*x)) {
 					const auto cur_size = double(x->size(p));
 					if (cur_size == 1)
 						return x;
@@ -258,12 +287,12 @@ namespace  cp {
 					for (auto c : subscription[x->id]) {
 						int cnt = 0;
 						for (auto y : c->scope) {
-							if (x != y && !I_.assigned(*y)) {
+							if (x != y && !I.assigned(*y)) {
 								x_w += con_weight[c->id];
 								break;
 							}
 						}
-						//if (!I_.assigned(*y))
+						//if (!I.assigned(*y))
 						//	++cnt;
 					//if (cnt > 1)
 					//	x_w += con_weight[c->id];
@@ -319,7 +348,7 @@ namespace  cp {
 	//		for (QTab* c : subscription[x]) {
 	//			if (var_stamp[x->id] > con_stamp[c->id]) {
 	//				for (auto y : c->scope) {
-	//					if (!I_.assigned(y)) {
+	//					if (!I.assigned(y)) {
 	//						bool aa = false;
 	//						for (auto z : c->scope)
 	//							if ((z != x) && var_stamp[z->id] > con_stamp[c->id])
@@ -398,7 +427,7 @@ namespace  cp {
 	//		for (QTab* c : subscription[x]) {
 	//			if (var_stamp[x->id] > con_stamp[c->id]) {
 	//				for (auto y : c->scope) {
-	//					if (!I_.assigned(y)) {
+	//					if (!I.assigned(y)) {
 	//						bool aa = false;
 	//						for (auto z : c->scope)
 	//							if ((z != x) && var_stamp[z->id] > con_stamp[c->id])
@@ -555,7 +584,7 @@ namespace  cp {
 	//	while (!q_.empty()) {
 	//		const auto j = q_.pop();
 	//		for (auto i : neibor_vars[j->id]) {
-	//			if (I_.assigned(i))
+	//			if (I.assigned(i))
 	//				continue;
 
 	//			const auto c = neibor_matrix[i->id][j->id];

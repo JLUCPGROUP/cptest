@@ -1,8 +1,8 @@
 ﻿#include "BacktrackingSearch.h"
 namespace cp {
 
-	MAC3::MAC3(const HModel& h)
-		:BacktrackingSearch(h) {
+	MAC3::MAC3(const HModel& h, const bool backtrackable)
+		:BacktrackingSearch(h, backtrackable) {
 
 	}
 	MAC3::~MAC3() {
@@ -25,7 +25,7 @@ namespace cp {
 					QVar* y = (c->scope[0] == x) ? c->scope[1] : c->scope[0];
 					const auto a = var_stamp[y->id] > con_stamp[c->id];
 					for (auto z : c->scope) {
-						if (!I_.assigned(*z)) {
+						if (!I.assigned(*z)) {
 							if ((z != x) || a) {
 								//cout << "revise: " << c->id << "," << z->id << endl;
 								if (revise(*c, *z, p)) {

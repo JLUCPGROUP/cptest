@@ -12,23 +12,24 @@ namespace cp {
 		bit_tmp_ = new u64[num_bit];
 		memset(bit_tmp_, ULLONG_MAX, num_bit * sizeof(u64));
 		bit_tmp_[num_bit - 1] >>= BITSIZE - limit;
-		//bit_tmp_.resize(num_bit, ULLONG_MAX);
-		//if (limit != BITSIZE)
-		//	bit_tmp_.back() >>= BITSIZE - limit;
 	}
 
 	QVar::~QVar() {
 		delete[] bit_tmp_;
-		if (runtime_) {
-			for (int i = 0; i < num_bd_; ++i)
-				delete[] bit_doms_[i];
-			delete[] bit_doms_;
-
-			delete[] size_;
-		}
+		if (backtrackable_)
+			disable_backtracking();
 	}
 
-	void QVar::runtime(const int size) {
+	void QVar::disable_backtracking() {
+		backtrackable_ = false;
+		for (int i = 0; i < num_bd_; ++i)
+			delete[] bit_doms_[i];
+		delete[] bit_doms_;
+		delete[] size_;
+	}
+
+	void QVar::enable_backtracking(const int size) {
+		backtrackable_ = true;
 		num_bd_ = size + 3;
 		bit_doms_ = new u64*[num_bd_]();
 		for (int i = 0; i < num_bd_; ++i)
@@ -107,9 +108,9 @@ namespace cp {
 
 	void QVar::show(const int p) const {
 		cout << "id = " << id << ": ";
-		for (auto a : vals)
+		for (int a = 0; a < capacity; ++a)
 			if (have(a, p))
-				cout << a << " ";
+				cout << vals[a] << " ";
 		cout << endl;
 	}
 

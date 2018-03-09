@@ -5,9 +5,7 @@
  *      Author: leezear
  */
 
-#ifndef XMLBUILDER_H_
-#define XMLBUILDER_H_
-
+#pragma once
 #include <xercesc/parsers/XercesDOMParser.hpp>
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/sax/HandlerBase.hpp>
@@ -119,4 +117,3 @@ private:
 
 }/* namespace cudacsp */
 
-#endif /* XMLBUILDER_H_ */

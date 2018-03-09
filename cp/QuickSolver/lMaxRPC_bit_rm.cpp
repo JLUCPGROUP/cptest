@@ -4,7 +4,8 @@
 
 namespace cp {
 
-	lMaxRPC_bit_rm::lMaxRPC_bit_rm(const HModel& h) :BacktrackingSearch(h) {
+	lMaxRPC_bit_rm::lMaxRPC_bit_rm(const HModel& h, const bool backtrackable) :
+		BacktrackingSearch(h, backtrackable) {
 		//初始化变量三角关系
 		common_neibor_.resize(num_vars, vector<vector<QVar*>>(num_vars));
 		set<QVar*> vars_map;
@@ -63,7 +64,7 @@ namespace cp {
 			const auto j = q_.pop(p);
 			//cout << "pop: " << j->id << endl;
 			for (auto i : neighborhood[j->id]) {
-				if (I_.assigned(*i)) {
+				if (I.assigned(*i)) {
 					//cout << "assigned: " << i->id << endl;
 					continue;
 				}
@@ -116,7 +117,7 @@ namespace cp {
 		//	if (c->sat(tmp_tuple_)) {
 		//		bool pc_witness = true;
 		//		for (auto k : common_neibor_[i.id][j.id]) {
-		//			if (!I_.assigned(*k)) {
+		//			if (!I.assigned(*k)) {
 		//				if (have_pc_wit(i, a, j, b, *k, p)) {
 		//					const auto idx_ijjb = get_QConVal_index(*c, j, b);
 		//					last_pc[cia_idx] = b;
@@ -133,7 +134,7 @@ namespace cp {
 		while (b != Limits::INDEX_OVERFLOW) {
 			bool pc_witness = true;
 			for (auto k : common_neibor_[i.id][j.id]) {
-				if (!I_.assigned(*k)) {
+				if (!I.assigned(*k)) {
 					if (!have_pc_wit(i, a, j, b, *k, p)) {
 						pc_witness = false;
 						break;
@@ -200,4 +201,6 @@ namespace cp {
 
 		return Limits::INDEX_OVERFLOW;
 	}
+
+
 }

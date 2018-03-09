@@ -36,6 +36,12 @@
     <ClCompile Include="MAC3.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="SAC.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BitSearch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="BMPath.xml">
@@ -47,6 +53,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="BacktrackingSearch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BitSearch.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

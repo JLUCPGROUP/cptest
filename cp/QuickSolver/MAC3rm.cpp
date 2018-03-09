@@ -5,8 +5,8 @@ namespace cp {
 	//	Exclude(tmp_tuple_);
 	//	res_.resize(tabs.size()*max_dom_size*max_arity, tmp_tuple_);
 	//}
-	MAC3rm::MAC3rm(const HModel& h) :
-	BacktrackingSearch(h) {
+	MAC3rm::MAC3rm(const HModel& h, const bool backtrackable) :
+		BacktrackingSearch(h, backtrackable) {
 		Exclude(tmp_tuple_);
 		res_.resize(num_cva, tmp_tuple_);
 		//const int num_res_ = num_tabs * max_dom_size * max_arity;
@@ -32,7 +32,7 @@ namespace cp {
 					QVar* y = (c->scope[0] == x) ? c->scope[1] : c->scope[0];
 					const auto a = var_stamp[y->id] > con_stamp[c->id];
 					for (auto z : c->scope) {
-						if (!I_.assigned(*z)) {
+						if (!I.assigned(*z)) {
 							if ((z != x) || a) {
 								//cout << "revise: " << c->id << "," << z->id << endl;
 								if (revise(*c, *z, p)) {

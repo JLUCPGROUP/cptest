@@ -3,17 +3,17 @@
 namespace cp {
 	class BacktrackingSearch {
 	public:
-		BacktrackingSearch(const HModel& h);
+		BacktrackingSearch(const HModel& h, const bool backtrackable = true);
 		virtual ~BacktrackingSearch();
 		inline int new_level();
 		inline int back_level();
-		inline void copy_level(const int src, const int dest);
+		void copy_level(const int src, const int dest);
 		//void clear_level(const int p);
 		void insert(QVar& v, const int p);
 		SearchStatistics statistics() const;
 		virtual PropagationState propagate(vector<QVar*>& x_evt, const int level) = 0;
 
-		virtual SearchStatistics solve(const Heuristic::Var varh, const Heuristic::Val valh, const int time_limits);
+		virtual SearchStatistics binary_search(const Heuristic::Var varh, const Heuristic::Val valh, const int time_limits);
 		QVal select_QVal(const Heuristic::Var varh, const Heuristic::Val valh, const int p);
 		QVar* select_QVar(const Heuristic::Var varh, const int p);
 		int select_value(const QVar& v, const Heuristic::Val valh, const int p);
@@ -31,9 +31,12 @@ namespace cp {
 		vector<vector<vector<QTab*>>> neibor_matrix;
 		//vector<vector<QVar*>> neibor_vars;
 		//  由于所有变量的域长度不一定相同 所以这里的c-value值不一定真实存在
-		int get_QConVal_index(const QConVal& c_val)const;
-		int get_QConVal_index(const QTab& c, const QVar& v, const int a) const;
-		int get_QConVal_index(const QTab& c, const int v_idx, const int a) const;
+		u64 get_QConVal_index(const QConVal& c_val)const;
+		u64 get_QConVal_index(const QTab& c, const QVar& v, const int a) const;
+		u64 get_QConVal_index(const QTab& c, const int v_idx, const int a) const;
+		void enable_backtracking();
+		void disable_backtracking();
+		void show(const int p);
 	protected:
 		vector<int> tmp_tuple_;
 		vars_heap q_;
@@ -47,9 +50,10 @@ namespace cp {
 		const int num_cva;
 		PropagationState ps_;
 		SearchStatistics ss_;
-		assignments_stack I_;
+		assignments_stack I;
 		int top_ = 0;
 		int tmp_;
+		bool backtrackable_ = false;
 	};
 
 	//class MAC3 :public BacktrackingSearch {
@@ -62,7 +66,7 @@ namespace cp {
 	//};
 	class MAC3 :public BacktrackingSearch {
 	public:
-		MAC3(const HModel& h);
+		MAC3(const HModel& h, const bool backtrackable = true);
 		virtual ~MAC3();
 		PropagationState propagate(vector<QVar*>& x_evt, const int level) override;
 		inline bool revise(const QTab& c, const QVar& v, const int level);
@@ -71,7 +75,7 @@ namespace cp {
 
 	class MAC3bit :public BacktrackingSearch {
 	public:
-		MAC3bit(const HModel& h);
+		MAC3bit(const HModel& h, const bool backtrackable = true);
 		virtual ~MAC3bit();
 		inline PropagationState propagate(vector<QVar*>& x_evt, const int level) override;
 		inline bool revise(const QTab& c, const QVar& v, const int level);
@@ -82,7 +86,7 @@ namespace cp {
 
 	class MAC3rm :public BacktrackingSearch {
 	public:
-		MAC3rm(const HModel& h);
+		MAC3rm(const HModel& h, const bool backtrackable = true);
 		virtual ~MAC3rm();
 		inline PropagationState propagate(vector<QVar*>& x_evt, const int level) override;
 		inline bool revise(const QTab& c, const QVar& v, const int level);
@@ -95,7 +99,7 @@ namespace cp {
 
 	class lMaxRPC_bit_rm :public BacktrackingSearch {
 	public:
-		lMaxRPC_bit_rm(const HModel& h);
+		lMaxRPC_bit_rm(const HModel& h, const bool backtrackable = true);
 		virtual ~lMaxRPC_bit_rm();
 		PropagationState propagate(vector<QVar*>& x_evt, const int p) override;
 		bool have_pc_support(const QVar& i, const int a, const QVar& j, const int p);
@@ -103,10 +107,35 @@ namespace cp {
 		inline int next_support_bit(const QVar& i, const int a, const QVar& j, const int v, const int p);
 		//int first_support_bit(const QVar& i, const int a, const QVar& j, const int v, const int p);
 	protected:
-
 		vector<vector<vector<QVar*>>> common_neibor_;
 		vector<int> last_pc;
 		vector<int> last_ac;
 		u64** bitSup_;
+	};
+
+	class SAC :public BacktrackingSearch {
+	public:
+		SAC(const HModel& h, const bool backtrackable = true);
+		//virtual bool enforce_ac(vector<QVar*>& x_evt, const int level) = 0;
+		virtual ~SAC(){};
+		inline PropagationState propagate(vector<QVar*>& x_evt, const int level) override = 0;
+		virtual bool enforce_ac(vector<QVar*>& x_evt, int& del, const int level) = 0;
+		int num_del() const;
+	protected:
+		vector<QVar*> x_evt_;
+	};
+
+	class SAC1bit :public SAC {
+	public:
+		SAC1bit(const HModel& h, const bool backtrackable = true);
+		//virtual bool enforce_ac(vector<QVar*>& x_evt, const int level) = 0;
+		virtual ~SAC1bit();
+		inline PropagationState propagate(vector<QVar*>& x_evt, const int level) override;
+		bool enforce_ac(vector<QVar*>& x_evt, int& del, const int level) override;
+		inline int revise(const QTab& c, const QVar& v, const int level) const;
+		inline bool seek_support(const QTab& c, const QVar& v, const int a, const int p) const;
+	protected:
+		u64 * * bitSup_;
+		//PropagationState ac_ps_;
 	};
 }

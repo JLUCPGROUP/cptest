@@ -22,8 +22,10 @@ namespace cp {
 		else {
 			cout << "error" << endl;
 		}
-		const int last0 = benchmark_path_.find_last_of('/') + 1;
-		file_name_ = benchmark_path_.substr(last0, benchmark_path_.size() - 4 - last0);
+		const int last0 = benchmark_path_.find_last_of('/');
+		const int last1 = benchmark_path_.find_last_of('\\');
+		const int last2 = (last0 > last1 ? last0 : last1) + 1;
+		file_name_ = benchmark_path_.substr(last2, benchmark_path_.size() - 4 - last2);
 	}
 
 	XBuilder::~XBuilder() {
