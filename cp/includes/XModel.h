@@ -134,6 +134,22 @@ namespace cp {
 	//const int DIV_BIT = 5;
 	//const int MOD_MASK = 0x1f;
 
+	//inline BitIndex GetBitIdx(const int idx) {
+	//	inline BitIndex GetBitIdx(const int idx) {
+
+	//	tuple<int, int> a;
+	//	get<0>(a) = idx >> DIV_BIT;
+	//	get<1>(a) = idx & MOD_MASK;
+	//	return BitIndex { idx >> DIV_BIT, idx & MOD_MASK };
+	//}
+	//#define GetBitIdx(idx) BitIndex { idx >> DIV_BIT, idx & MOD_MASK }
+	//inline tuple<int, int> GetBitIdx(const int idx) {
+	//	tuple<int, int> a;
+	//	get<0>(a) = idx >> DIV_BIT;
+	//	get<1>(a) = idx & MOD_MASK;
+	//	return a;
+	//}
+
 	namespace Heuristic {
 		enum Var {
 			VRH_LEX,
@@ -163,25 +179,11 @@ namespace cp {
 		int y;
 	};
 
-	//inline BitIndex GetBitIdx(const int idx) {
-	//	inline BitIndex GetBitIdx(const int idx) {
-
-	//	tuple<int, int> a;
-	//	get<0>(a) = idx >> DIV_BIT;
-	//	get<1>(a) = idx & MOD_MASK;
-	//	return BitIndex { idx >> DIV_BIT, idx & MOD_MASK };
-	//}
-//#define GetBitIdx(idx) BitIndex { idx >> DIV_BIT, idx & MOD_MASK }
+	
 	inline BitIndex GetBitIdx(const int idx) {
 		return BitIndex{ idx >> DIV_BIT, idx & MOD_MASK };
 	}
 
-	//inline tuple<int, int> GetBitIdx(const int idx) {
-	//	tuple<int, int> a;
-	//	get<0>(a) = idx >> DIV_BIT;
-	//	get<1>(a) = idx & MOD_MASK;
-	//	return a;
-	//}
 	inline int GetValue(const int i, const int j) {
 		return  (i << DIV_BIT) + j;
 	}
@@ -201,7 +203,7 @@ namespace cp {
 	}
 
 	inline int FirstOne(const u64 UseMask) {
-		register u64 index = UseMask;
+		u64 index = UseMask;
 		//将第一个为1位的低位都置1，其它位都置0
 		index = (index - 1)  &  ~index;
 		//得到有多少为1的位
@@ -254,7 +256,7 @@ namespace cp {
 	public:
 		const int id;
 		int xdom_id = -1;
-		XVar::XVar(const int id, char* xdom_str);
+		XVar(const int id, char* xdom_str);
 		void show() const;
 		~XVar();
 	};

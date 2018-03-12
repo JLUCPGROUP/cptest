@@ -61,7 +61,7 @@ namespace cp {
 		int capacity() const;
 		bool full() const;
 		bool empty() const;
-		BVal operator[](const int i) const;
+		int operator[](const int i) const;
 		BVal at(const int i) const;
 		void clear();
 		bool assigned(const int v) const;
@@ -79,19 +79,21 @@ namespace cp {
 	public:
 		BitSearch(const HModel& m);
 		bool initial();
-		void build_nei_model() const;
-		void build_full_model() const;
+		void build_nei_model();
+		void build_full_model();
 		bool propagate(const BVal& val);
 		void back_level();
 		bool nonbinary_search(const Heuristic::Var varh, const Heuristic::Val valh, const bool neibor_propagate, const int time_limits);
 		virtual ~BitSearch();
-		inline BVal select_BVal(const Heuristic::Var varh, const Heuristic::Val valh) const;
-		inline int select_BVar(const Heuristic::Var varh) const;
-		inline int select_value(const int v, const Heuristic::Val valh) const;
-		inline bool next(BVal& v_a) const;
+		BVal select_BVal(const Heuristic::Var varh, const Heuristic::Val valh) const;
+		int select_BVar(const Heuristic::Var varh) const;
+		int select_value(const int v, const Heuristic::Val valh) const;
+		bool next(BVal& v_a) const;
+		inline int size(const int v, const int p) const;
+		inline int head(const int v, const int p) const;
+		SearchStatistics statistics() const;
 		int top_;
 		const int limit;
-		const int num_bit;
 		const int num_vars;
 		const int num_cons;
 		const int max_arity;
@@ -102,7 +104,7 @@ namespace cp {
 		int** constraint_matrix;
 		//wdeg启发式两种算法计算方法不相同
 		double** wdeg;
-		double** ddeg;
+		//double** ddeg;
 		//deg启发式保留初始网络的信息
 		double* deg;
 
@@ -112,5 +114,7 @@ namespace cp {
 		u64**** bit_sub_dom_;
 		bit_assigned_stack I;
 		SearchStatistics ss;
+
+
 	};
 }

@@ -37,11 +37,14 @@ namespace cp {
 		void enable_backtracking();
 		void disable_backtracking();
 		void show(const int p);
+		vector<vector<int>> solutions;
+		string get_solution_str();
 	protected:
 		vector<int> tmp_tuple_;
 		vars_heap q_;
 		vector<QVar*> get_scope(const HTab& t);
 		vector<QVar*> get_neighbor(const QVar& v);
+		void get_solution();
 		const int max_arity;
 		const int max_dom_size;
 		const int max_bitDom_size;
@@ -54,6 +57,8 @@ namespace cp {
 		int top_ = 0;
 		int tmp_;
 		bool backtrackable_ = false;
+		vector<int> solution_;
+		string sol_str;
 	};
 
 	//class MAC3 :public BacktrackingSearch {

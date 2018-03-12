@@ -172,6 +172,8 @@
 #include <iostream>
 #include <limits>
 #include <random>
+#include <chrono>
+#include <string>
 using namespace std;
 typedef unsigned long long u64;
 int f2(u64 num) {
@@ -253,12 +255,14 @@ int f7(int num) {
 }
 
 int main() {
-	std::random_device rd;
-	const std::uniform_int_distribution<u64> dist(0, ULLONG_MAX);
-	auto c = dist(rd);
-	std::cout << sizeof(c) << "," << c << std::endl;
+	//std::random_device rd;
+	//const std::uniform_int_distribution<u64> dist(0, ULLONG_MAX);
+	//auto c = dist(rd);
+	//std::cout << sizeof(c) << "," << c << std::endl;
 
-	u64 a = ULLONG_MAX;
-	cout << f2(c) << ", " << f5(c) << endl;
-	return 0;
+	//u64 a = ULLONG_MAX;
+	//cout << f2(c) << ", " << f5(c) << endl;
+	//return 0;
+	auto tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+	cout << std::to_string(tt) << endl;
 }

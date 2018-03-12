@@ -39,7 +39,7 @@ namespace cp {
 		x_evt_.clear();
 		auto modified = false;
 		//cout << "ac remove: " << del << endl;
-		cout << "initial ac: " << ps_.num_delete << endl;
+		//cout << "initial ac: " << ps_.num_delete << endl;
 
 		//show(tmp_);
 		if (!result) {

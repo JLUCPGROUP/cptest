@@ -2,6 +2,7 @@
 #include "Timer.h"
 #include "BacktrackingSearch.h"
 #include <set>
+#include <sstream>
 
 namespace  cp {
 	int BacktrackingSearch::new_level() {
@@ -33,6 +34,12 @@ namespace  cp {
 					vs.insert(x);
 
 		return vector<QVar*>(vs.begin(), vs.end());
+	}
+
+	void BacktrackingSearch::get_solution() {
+		for (int i = 0; i < num_vars; ++i)
+			solution_[i] = vars[i]->vals[I.v_[i]];
+		solutions.push_back(solution_);
 	}
 
 	BacktrackingSearch::BacktrackingSearch(const HModel& h, const bool backtrackable) :
@@ -89,6 +96,8 @@ namespace  cp {
 		Exclude(tmp_tuple_);
 
 		I.initial(h);
+		solutions.reserve(1);
+		solution_.resize(num_vars);
 	}
 
 	BacktrackingSearch::~BacktrackingSearch() {
@@ -130,6 +139,22 @@ namespace  cp {
 	void BacktrackingSearch::show(const int p) {
 		for (auto x : vars)
 			x->show(p);
+	}
+
+	string BacktrackingSearch::get_solution_str() {
+		if (solutions.empty()) {
+			sol_str = "";
+			return "";
+		}
+		else {
+			stringstream strs;
+			for (int a : solutions[0]) {
+				strs << a << " ";
+			}
+			sol_str = strs.str();
+			sol_str.pop_back();
+		}
+		return sol_str;
 	}
 
 	vector<QVar*> BacktrackingSearch::get_scope(const HTab& t) {
@@ -184,8 +209,11 @@ namespace  cp {
 			}
 
 			if (consistent_&&I.full()) {
-				cout << I << endl;
+				//cout << I << endl;
 				finished_ = true;
+				ss_.solve_time = t.elapsed();
+				get_solution();
+				return ss_;
 				//++sol_count_;
 				//consistent_ = false;
 			}

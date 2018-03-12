@@ -141,25 +141,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BacktrackingSearch.h" />
-    <ClInclude Include="BitSearch.h" />
-    <ClInclude Include="QModel.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="BitSearch.cpp" />
     <ClCompile Include="lMaxRPC_bit_rm.cpp" />
     <ClCompile Include="MAC3.cpp" />
     <ClCompile Include="MAC3bit.cpp" />
+    <ClCompile Include="mac3bit_test.cpp" />
     <ClCompile Include="MAC3rm.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="BacktrackingSearch.cpp" />
     <ClCompile Include="QModel.cpp" />
     <ClCompile Include="SAC.cpp" />
+    <ClCompile Include="test_lmaxrpc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="BMPath.xml">
       <SubType>Designer</SubType>
     </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\includes\BacktrackingSearch.h" />
+    <ClInclude Include="..\includes\BitSearch.h" />
+    <ClInclude Include="..\includes\QModel.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -42,6 +42,12 @@
     <ClCompile Include="BitSearch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="mac3bit_test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test_lmaxrpc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="BMPath.xml">
@@ -49,13 +55,13 @@
     </Xml>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="QModel.h">
+    <ClInclude Include="..\includes\BitSearch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="BacktrackingSearch.h">
+    <ClInclude Include="..\includes\QModel.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="BitSearch.h">
+    <ClInclude Include="..\includes\BacktrackingSearch.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

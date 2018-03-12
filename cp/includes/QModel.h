@@ -99,10 +99,10 @@ namespace cp {
 		bool solution(vector<int>& sol) const;
 		friend ostream& operator<< (std::ostream &os, assignments_stack &I);
 		friend ostream& operator<< (std::ostream &os, assignments_stack* I);
+		vector<int> v_;
 	protected:
 		//int* v_;
 		//QVal* qvals_;
-		vector<int> v_;
 		vector<QVal> qvals_;
 		int max_size_;
 	};
