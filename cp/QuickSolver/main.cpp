@@ -15,16 +15,16 @@
 //	builder.GenerateHModel(m);
 //	//MAC3 s(*hm);
 //	//MAC3rm s(*hm);
-//	MAC3bit s(*m);
+//	//MAC3bit s(*m);
 //	////lMaxRPC_bit_rm s(*hm);
 //	//s.propagate(s.vars, 0);
-//	////s.binary_search(Heuristic::Var::VRH_DOM_WDEG_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
-//	s.binary_search(Heuristic::Var::VRH_DOM_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
-//	cout << builder.file_name() << endl;
-//	cout << "time = " << s.statistics().solve_time << endl;
-//	cout << "positives = " << s.statistics().num_positives << endl;
-//	cout << "solution = " << s.get_solution_str() << endl;
-//	cout << "revisions = " << s.statistics().num_revisions << endl;
+//	//s.binary_search(Heuristic::Var::VRH_DOM_WDEG_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
+//	////s.binary_search(Heuristic::Var::VRH_DOM_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
+//	//cout << builder.file_name() << endl;
+//	//cout << "time = " << s.statistics().solve_time << endl;
+//	//cout << "positives = " << s.statistics().num_positives << endl;
+//	//cout << "solution = " << s.get_solution_str() << endl;
+//	//cout << "revisions = " << s.statistics().num_revisions << endl;
 //
 //	BitSearch ss(*m);
 //	ss.nonbinary_search(Heuristic::Var::VRH_DOM_MIN, Heuristic::Val::VLH_MIN, false, TimeLimit);
@@ -34,6 +34,7 @@
 //	cout << "search_time = " << ss.statistics().search_time << endl;
 //	cout << "total_time = " << ss.statistics().total_time << endl;
 //	cout << "positives = " << ss.statistics().num_positives << endl;
+//	cout << "solution = " << ss.get_solution_str() << endl;
 //	delete m;
 //	return 0;
 //}

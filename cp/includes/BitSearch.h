@@ -70,7 +70,7 @@ namespace cp {
 		//vector<int> solution();
 	protected:
 		vector<BVal> vals_;
-		vector<int> asnd_;
+		vector<int> v_;
 		int top_ = 0;
 		int max_size_;
 	};
@@ -92,6 +92,7 @@ namespace cp {
 		inline int size(const int v, const int p) const;
 		inline int head(const int v, const int p) const;
 		SearchStatistics statistics() const;
+		bool solution_check() const;
 		int top_;
 		const int limit;
 		const int num_vars;
@@ -114,7 +115,10 @@ namespace cp {
 		u64**** bit_sub_dom_;
 		bit_assigned_stack I;
 		SearchStatistics ss;
-
-
+		vector<vector<int>> solutions;
+		string get_solution_str();
+		void get_solution();
+		vector<int> solution_;
+		string sol_str;
 	};
 }

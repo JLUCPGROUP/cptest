@@ -157,6 +157,22 @@ namespace  cp {
 		return sol_str;
 	}
 
+	bool BacktrackingSearch::solution_check() {
+		if (solutions.empty())
+			return false;
+
+		vector<int> tuple(max_arity);
+		tuple.clear();
+		for (auto c : tabs) {
+			for (auto v : c->scope)
+				tuple.push_back(solution_[v->id]);
+			if (!c->sat(tuple))
+				return false;
+			tuple.clear();
+		}
+		return true;
+	}
+
 	vector<QVar*> BacktrackingSearch::get_scope(const HTab& t) {
 		vector<QVar*> tt(t.scope.size());
 		for (int i = 0; i < t.scope.size(); ++i)
@@ -313,17 +329,12 @@ namespace  cp {
 					double x_dw;
 
 					for (auto c : subscription[x->id]) {
-						int cnt = 0;
-						for (auto y : c->scope) {
-							if (x != y && !I.assigned(*y)) {
-								x_w += con_weight[c->id];
-								break;
-							}
-						}
-						//if (!I.assigned(*y))
-						//	++cnt;
-					//if (cnt > 1)
-					//	x_w += con_weight[c->id];
+						int asd_cnt = 0;
+						for (auto y : c->scope)
+							if (I.assigned(*y))
+								++asd_cnt;
+						if ((asd_cnt + 1) < c->arity)
+							x_w += con_weight[c->id];
 					}
 
 					if (!x_w)

@@ -39,6 +39,7 @@ namespace cp {
 		void show(const int p);
 		vector<vector<int>> solutions;
 		string get_solution_str();
+		bool solution_check();
 	protected:
 		vector<int> tmp_tuple_;
 		vars_heap q_;

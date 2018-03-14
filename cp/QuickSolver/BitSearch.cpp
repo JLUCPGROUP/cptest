@@ -1,6 +1,7 @@
 ﻿#include "BitSearch.h"
 #include "Timer.h"
 #include <bitset>
+#include <sstream>
 
 namespace cp {
 	const BVal& BVal::operator=(const BVal& rhs) {
@@ -35,7 +36,7 @@ namespace cp {
 	void bit_assigned_stack::initial(const int num_vars) {
 		max_size_ = num_vars;
 		vals_.resize(num_vars);
-		asnd_.resize(num_vars, -1);
+		v_.resize(num_vars, -1);
 	}
 
 	void bit_assigned_stack::push(const BVal& v_a) {
@@ -43,18 +44,18 @@ namespace cp {
 		////进入的是positive decision 当前栈顶是negative decision
 		//if (pre >= 0 && (!vals_[pre].aop) && v_a.aop) {
 		//	vals_[pre] = v_a;
-		//	asnd_[v_a.v] = true;
+		//	v_[v_a.v] = true;
 		//}
 		//else {
 		vals_[top_] = v_a;
-		asnd_[v_a.v] = v_a.aop ? v_a.a : -1;
+		v_[v_a.v] = v_a.aop ? v_a.a : -1;
 		++top_;
 		//}
 	}
 
 	BVal bit_assigned_stack::pop() {
 		--top_;
-		asnd_[vals_[top_].v] = -1;
+		v_[vals_[top_].v] = -1;
 		return vals_[top_];
 	};
 
@@ -63,10 +64,14 @@ namespace cp {
 	int bit_assigned_stack::capacity() const { return max_size_; }
 	bool bit_assigned_stack::full() const { return top_ == max_size_; }
 	bool bit_assigned_stack::empty() const { return top_ == 0; }
-	int bit_assigned_stack::operator[](const int i) const { return asnd_[i]; };
+	int bit_assigned_stack::operator[](const int i) const { return v_[i]; };
 	BVal bit_assigned_stack::at(const int i) const { return vals_[i]; }
-	void bit_assigned_stack::clear() { top_ = 0; };
-	bool bit_assigned_stack::assigned(const int v) const { return asnd_[v] != -1; };
+	void bit_assigned_stack::clear() {
+		top_ = 0;
+		//vals_.clear();
+		v_.assign(v_.size(), Limits::INDEX_OVERFLOW);
+	};
+	bool bit_assigned_stack::assigned(const int v) const { return v_[v] != -1; };
 
 	std::ostream& operator<<(std::ostream& os, const bit_assigned_stack& I) {
 		for (int i = 0; i < I.size(); ++i)
@@ -145,6 +150,8 @@ namespace cp {
 			wdeg[i] = new double[num_vars]();
 
 		I.initial(num_vars);
+		solutions.reserve(1);
+		solution_.resize(num_vars);
 	}
 
 	bool BitSearch::initial() {
@@ -347,8 +354,7 @@ namespace cp {
 		ss.total_time += ss.build_time;
 
 		t.reset();
-		bool finished = false;
-		const u64 search_limit = time_limits - ss.build_time - ss.sat_initial;
+		const u64 search_limit = time_limits - ss.build_time - ss.initial_propagate_time;
 		BVal val = select_BVal(varh, valh);
 		bool consistent = false;
 		while ((!I.empty()) || (val != Nodes::NullNode)) {
@@ -374,7 +380,7 @@ namespace cp {
 					ss.search_time = t.elapsed();
 					ss.total_time += ss.search_time;
 					++ss.num_sol;
-					cout << I << endl;
+					get_solution();
 					return true;
 				}
 				else {
@@ -452,11 +458,6 @@ namespace cp {
 					const double cur_size = size(i, top_ - 1);
 					if (cur_size == 1)
 						return i;
-
-					//for (int j = 0; j < num_bit; j++) {
-					//	cur_size += Count(stack_[top_ - 1][i][j]);
-					//}
-					//cur
 					if (cur_size < min_size) {
 						min_size = cur_size;
 						var = i;
@@ -468,7 +469,32 @@ namespace cp {
 		case Heuristic::VRH_VWDEG: break;
 		case Heuristic::VRH_DOM_DEG_MIN: break;
 		case Heuristic::VRH_DOM_DDEG_MIN: break;
-		case Heuristic::VRH_DOM_WDEG_MIN: break;
+		case Heuristic::VRH_DOM_WDEG_MIN:
+		{
+			for (int i = 0; i < num_vars; ++i) {
+				if (!I.assigned(i)) {
+					const double cur_size = size(i, top_ - 1);
+					if (cur_size == 1)
+						return i;
+					double i_dom_wdeg = 0.0;
+					double i_wdeg = 0;
+
+					for (int j = 0; j < num_vars; ++j)
+						if (!I.assigned(j))
+							i_wdeg += wdeg[i][j];
+
+					if (i_wdeg == 0)
+						return i;
+					else
+						i_dom_wdeg = cur_size / i_wdeg;
+
+					if (i_dom_wdeg < min_size) {
+						min_size = i_dom_wdeg;
+						var = i;
+					}
+				}
+			}
+		}return var;
 		default:;
 		}
 		return var;
@@ -524,6 +550,32 @@ namespace cp {
 
 	SearchStatistics BitSearch::statistics() const {
 		return ss;
+	}
+
+	bool BitSearch::solution_check() const {
+		return sac->solution_check();
+	}
+
+	string BitSearch::get_solution_str() {
+		if (solutions.empty()) {
+			sol_str = "";
+			return "";
+		}
+		else {
+			stringstream strs;
+			for (int a : solutions[0]) {
+				strs << a << " ";
+			}
+			sol_str = strs.str();
+			sol_str.pop_back();
+		}
+		return sol_str;
+	}
+
+	void BitSearch::get_solution() {
+		for (int i = 0; i < num_vars; ++i)
+			solution_[i] = sac->vars[i]->vals[I[i]];
+		solutions.push_back(solution_);
 	}
 }
 

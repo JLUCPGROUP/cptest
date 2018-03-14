@@ -6,13 +6,14 @@
 //#include <fstream>
 //#include "BacktrackingSearch.h"
 //#include <chrono>
+//#include "BitSearch.h"
 //using namespace cp;
 //using namespace std;
 //
 //#define LOGFILE
 //const string XPath = "BMPath.xml";
 //const int64_t TimeLimit = 1800100;
-//const string X_PATH = "E:\\Projects\\benchmarks\\";
+//const string X_PATH = R"(E:\Projects\benchmarks\)";
 //const string bmp_ext = ".xml";
 //void getFilesAll(const string& path, vector<string>& files);
 //bool getScheme(char ** argv, SearchScheme& ss);
@@ -33,10 +34,9 @@
 //	vector<string> files;
 //	getFilesAll(X_PATH + argv[1], files);
 //	auto tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-//	cout << std::to_string(tt) << endl;
 //#ifdef LOGFILE
 //	ofstream lofi;
-//	const string bm_res = X_PATH + "res2\\lmx\\" + ss.vrh_str + "\\"+ argv[1] + "-" + std::to_string(tt) + ".csv";
+//	const string bm_res = X_PATH + "res2\\FC\\" + ss.vrh_str + "\\" + argv[1] + "-" + std::to_string(tt) + ".csv";
 //	lofi.open(bm_res, ios::out | ios::trunc);
 //	cout << bm_res << endl;
 //	if (!lofi.is_open())
@@ -46,21 +46,23 @@
 //	double ts = 0;
 //	double tn = 0;
 //	u64 to = 0;
-//	for (const auto& f : files) {
+//	for (const auto f : files) {
 //		cout << f << endl;
 //		XBuilder builder(f, XRT_BM);
 //		HModel* m = new HModel();
 //		builder.GenerateHModel(m);
-//		lMaxRPC_bit_rm s(*m);
-//		s.binary_search(ss.vrh, Heuristic::VLH_MIN, TimeLimit);
+
+//		BitSearch s(*m);
+//		s.nonbinary_search(ss.vrh, Heuristic::Val::VLH_MIN, true, TimeLimit);
 //		const bool test = s.solution_check();
 //#ifdef LOGFILE
-//		lofi << builder.file_name() << "," << s.statistics().solve_time << "," << s.statistics().num_positives << "," << test << "," << s.get_solution_str() << endl;
+//		lofi << builder.file_name() << "," << s.statistics().total_time << "," << s.statistics().num_positives << "," << test << "," << s.get_solution_str() << endl;
 //#endif
-//		ts += s.statistics().solve_time;
+//		ts += s.statistics().total_time;
 //		tn += s.statistics().num_positives;
-//		if (s.statistics().solve_time > TimeLimit)
+//		if (s.statistics().total_time > TimeLimit)
 //			++to;
+//
 //		delete m;
 //	}
 //	const double avg_ts = ts / files.size() / 1000;

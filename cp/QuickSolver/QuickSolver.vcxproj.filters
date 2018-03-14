@@ -13,11 +13,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{962a1278-120c-4984-a900-579a7751eb02}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="QModel.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -42,11 +42,20 @@
     <ClCompile Include="BitSearch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="mac3bit_test.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="test_lmaxrpc.cpp">
-      <Filter>源文件</Filter>
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="mac3bit_test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="CFC.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="FC.cpp">
+      <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

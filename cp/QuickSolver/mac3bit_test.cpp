@@ -36,14 +36,16 @@
 //	cout << std::to_string(tt) << endl;
 //#ifdef LOGFILE
 //	ofstream lofi;
-//	const string bm_res = X_PATH + "res2\\mac3bit\\" + argv[1] + "-" + ss.ds_str + "-" + ss.vrh_str + std::to_string(tt) + ".csv";
+//	const string bm_res = X_PATH + "res2\\mac3bit\\" + ss.vrh_str + "\\"+ argv[1] + "-" + std::to_string(tt) + ".csv";
 //	lofi.open(bm_res, ios::out | ios::trunc);
 //	cout << bm_res << endl;
 //	if (!lofi.is_open())
 //		return 0;
-//	lofi << "files" << "," << "cpu" << "," << "#nodes" << "," << "solution" << endl;
+//	lofi << "files" << "," << "cpu" << "," << "#nodes" << "," << "test" << "," << "solution" << endl;
 //#endif
-//
+//	double ts = 0;
+//	double tn = 0;
+//	u64 to = 0;
 //	for (const auto f : files) {
 //		cout << f << endl;
 //		XBuilder builder(f, XRT_BM);
@@ -51,12 +53,24 @@
 //		builder.GenerateHModel(m);
 //		MAC3bit s(*m);
 //		s.binary_search(ss.vrh, Heuristic::VLH_MIN, TimeLimit);
-//
+//		const bool test = s.solution_check();
 //#ifdef LOGFILE
-//		lofi << builder.file_name() << "," << s.statistics().solve_time << "," << s.statistics().num_positives << "," << s.get_solution_str() << endl;
+//		lofi << builder.file_name() << "," << s.statistics().solve_time << "," << s.statistics().num_positives << "," << test << "," << s.get_solution_str() << endl;
 //#endif
+//		ts += s.statistics().solve_time;
+//		tn += s.statistics().num_positives;
+//		if (s.statistics().solve_time > TimeLimit)
+//			++to;
 //		delete m;
 //	}
+//	const double avg_ts = ts / files.size() / 1000;
+//	const double avg_tn = tn / files.size() / 1000000;
+//#ifdef LOGFILE
+//	lofi << avg_ts << endl;
+//	lofi << avg_tn << endl;
+//	lofi << to << endl;
+//	lofi.close();
+//#endif
 //	return 0;
 //}
 //

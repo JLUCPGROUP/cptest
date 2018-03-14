@@ -142,6 +142,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BitSearch.cpp" />
+    <ClCompile Include="CFC.cpp" />
+    <ClCompile Include="FC.cpp" />
     <ClCompile Include="lMaxRPC_bit_rm.cpp" />
     <ClCompile Include="MAC3.cpp" />
     <ClCompile Include="MAC3bit.cpp" />
