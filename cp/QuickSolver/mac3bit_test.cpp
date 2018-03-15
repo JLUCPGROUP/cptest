@@ -36,7 +36,7 @@
 //	cout << std::to_string(tt) << endl;
 //#ifdef LOGFILE
 //	ofstream lofi;
-//	const string bm_res = X_PATH + "res2\\mac3bit\\" + ss.vrh_str + "\\"+ argv[1] + "-" + std::to_string(tt) + ".csv";
+//	const string bm_res = X_PATH + "res2\\mac3bit\\" + ss.vrh_str + "\\" + argv[1] + "-" + std::to_string(tt) + ".csv";
 //	lofi.open(bm_res, ios::out | ios::trunc);
 //	cout << bm_res << endl;
 //	if (!lofi.is_open())
@@ -55,7 +55,7 @@
 //		s.binary_search(ss.vrh, Heuristic::VLH_MIN, TimeLimit);
 //		const bool test = s.solution_check();
 //#ifdef LOGFILE
-//		lofi << builder.file_name() << "," << s.statistics().solve_time << "," << s.statistics().num_positives << "," << test << "," << s.get_solution_str() << endl;
+//		lofi << builder.file_name() << "," << s.statistics().solve_time << "," << s.statistics().num_positives << "," << test << "," << s.sol_str << endl;
 //#endif
 //		ts += s.statistics().solve_time;
 //		tn += s.statistics().num_positives;

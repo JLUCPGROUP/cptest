@@ -153,6 +153,7 @@
     <ClCompile Include="BacktrackingSearch.cpp" />
     <ClCompile Include="QModel.cpp" />
     <ClCompile Include="SAC.cpp" />
+    <ClCompile Include="STR.cpp" />
     <ClCompile Include="test_lmaxrpc.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -56,7 +56,7 @@
 //		s.nonbinary_search(ss.vrh, Heuristic::Val::VLH_MIN, false, TimeLimit);
 //		const bool test = s.solution_check();
 //#ifdef LOGFILE
-//		lofi << builder.file_name() << "," << s.statistics().total_time << "," << s.statistics().num_positives << "," << test << "," << s.get_solution_str() << endl;
+//		lofi << builder.file_name() << "," << s.statistics().total_time << "," << s.statistics().num_positives << "," << test << "," << s.sol_str << endl;
 //#endif
 //		ts += s.statistics().total_time;
 //		tn += s.statistics().num_positives;

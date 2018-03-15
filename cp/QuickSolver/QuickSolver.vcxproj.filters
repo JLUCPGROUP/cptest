@@ -57,6 +57,9 @@
     <ClCompile Include="FC.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="STR.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="BMPath.xml">

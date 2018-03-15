@@ -37,9 +37,12 @@ namespace  cp {
 	}
 
 	void BacktrackingSearch::get_solution() {
-		for (int i = 0; i < num_vars; ++i)
+		for (int i = 0; i < num_vars; ++i) {
 			solution_[i] = vars[i]->vals[I.v_[i]];
+			sol_std[i] = I.v_[i];
+		}
 		solutions.push_back(solution_);
+		get_solution_str();
 	}
 
 	BacktrackingSearch::BacktrackingSearch(const HModel& h, const bool backtrackable) :
@@ -98,6 +101,7 @@ namespace  cp {
 		I.initial(h);
 		solutions.reserve(1);
 		solution_.resize(num_vars);
+		sol_std.resize(num_vars);
 	}
 
 	BacktrackingSearch::~BacktrackingSearch() {
@@ -165,7 +169,7 @@ namespace  cp {
 		tuple.clear();
 		for (auto c : tabs) {
 			for (auto v : c->scope)
-				tuple.push_back(solution_[v->id]);
+				tuple.push_back(sol_std[v->id]);
 			if (!c->sat(tuple))
 				return false;
 			tuple.clear();

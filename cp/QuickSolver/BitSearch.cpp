@@ -152,6 +152,7 @@ namespace cp {
 		I.initial(num_vars);
 		solutions.reserve(1);
 		solution_.resize(num_vars);
+		sol_std_.resize(num_vars);
 	}
 
 	bool BitSearch::initial() {
@@ -573,9 +574,14 @@ namespace cp {
 	}
 
 	void BitSearch::get_solution() {
-		for (int i = 0; i < num_vars; ++i)
+		for (int i = 0; i < num_vars; ++i) {
 			solution_[i] = sac->vars[i]->vals[I[i]];
+			sol_std_[i] = I[i];
+		}
 		solutions.push_back(solution_);
+		sac->solutions.push_back(solution_);
+		sac->sol_std = sol_std_;
+		get_solution_str();
 	}
 }
 

@@ -119,6 +119,7 @@ namespace cp {
 		string get_solution_str();
 		void get_solution();
 		vector<int> solution_;
+		vector<int> sol_std_;
 		string sol_str;
 	};
 }

@@ -40,6 +40,8 @@ namespace cp {
 		vector<vector<int>> solutions;
 		string get_solution_str();
 		bool solution_check();
+		string sol_str;
+		vector<int> sol_std;
 	protected:
 		vector<int> tmp_tuple_;
 		vars_heap q_;
@@ -59,7 +61,6 @@ namespace cp {
 		int tmp_;
 		bool backtrackable_ = false;
 		vector<int> solution_;
-		string sol_str;
 	};
 
 	//class MAC3 :public BacktrackingSearch {
@@ -123,7 +124,7 @@ namespace cp {
 	public:
 		SAC(const HModel& h, const bool backtrackable = true);
 		//virtual bool enforce_ac(vector<QVar*>& x_evt, const int level) = 0;
-		virtual ~SAC(){};
+		virtual ~SAC() {};
 		inline PropagationState propagate(vector<QVar*>& x_evt, const int level) override = 0;
 		virtual bool enforce_ac(vector<QVar*>& x_evt, int& del, const int level) = 0;
 		int num_del() const;
@@ -143,5 +144,9 @@ namespace cp {
 	protected:
 		u64 * * bitSup_;
 		//PropagationState ac_ps_;
+	};
+
+	class STR1 :public BacktrackingSearch {
+		STR1(const HModel h, const bool backtrackable = true);
 	};
 }
