@@ -349,41 +349,41 @@ namespace cp {
 		const int pre = top_ - 1;;
 		++top_;
 
-		if (neibor_prop) {
-			for (int i = 0; i < num_vars; ++i) {
-				if (constraint_matrix[val.v][i] != -1) {
-					u64 any = 0;
-					for (int j = 0; j < max_bitDom_size; ++j) {
-						stack_[pre + 1][i][j] = stack_[pre][i][j] & bit_sub_dom_[val.v][val.a][i][j];
-						any |= stack_[pre + 1][i][j];
-					}
-					if (!any) {
-						++wdeg[val.v][i];
-						++wdeg[i][val.v];
-						return false;
-					}
-				}
-				else {
-					for (int j = 0; j < max_bitDom_size; ++j) {
-						stack_[pre + 1][i][j] = stack_[pre][i][j];
-					}
-				}
+		//if (neibor_prop) {
+		//	for (int i = 0; i < num_vars; ++i) {
+		//		if (constraint_matrix[val.v][i] != -1) {
+		//			u64 any = 0;
+		//			for (int j = 0; j < max_bitDom_size; ++j) {
+		//				stack_[pre + 1][i][j] = stack_[pre][i][j] & bit_sub_dom_[val.v][val.a][i][j];
+		//				any |= stack_[pre + 1][i][j];
+		//			}
+		//			if (!any) {
+		//				++wdeg[val.v][i];
+		//				++wdeg[i][val.v];
+		//				return false;
+		//			}
+		//		}
+		//		else {
+		//			for (int j = 0; j < max_bitDom_size; ++j) {
+		//				stack_[pre + 1][i][j] = stack_[pre][i][j];
+		//			}
+		//		}
+		//	}
+		//}
+		//else {
+		for (int i = 0; i < num_vars; ++i) {
+			u64 any = 0;
+			for (int j = 0; j < max_bitDom_size; ++j) {
+				stack_[pre + 1][i][j] = stack_[pre][i][j] & bit_sub_dom_[val.v][val.a][i][j];
+				any |= stack_[pre + 1][i][j];
+			}
+			if (!any) {
+				++wdeg[val.v][i];
+				++wdeg[i][val.v];
+				return false;
 			}
 		}
-		else {
-			for (int i = 0; i < num_vars; ++i) {
-				u64 any = 0;
-				for (int j = 0; j < max_bitDom_size; ++j) {
-					stack_[pre + 1][i][j] = stack_[pre][i][j] & bit_sub_dom_[val.v][val.a][i][j];
-					any |= stack_[pre + 1][i][j];
-				}
-				if (!any) {
-					++wdeg[val.v][i];
-					++wdeg[i][val.v];
-					return false;
-				}
-			}
-		}
+		//}
 
 		return true;
 	}

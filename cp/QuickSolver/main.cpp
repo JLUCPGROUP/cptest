@@ -15,8 +15,8 @@
 //	builder.GenerateHModel(m);
 //	//MAC3 s(*hm);
 //	//MAC3rm s(*hm);
-//	//MAC3bit s(*m);
-//	lMaxRPC_bit_rm s(*m);
+//	MAC3bit s(*m);
+//	//lMaxRPC_bit_rm s(*m);
 //	//s.propagate(s.vars, 0);
 //	//s.binary_search(Heuristic::Var::VRH_DOM_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
 //	s.nonbinary_search(Heuristic::Var::VRH_DEG_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
@@ -30,7 +30,7 @@
 //	cout << "check = " << s.solution_check() << endl;
 //
 //	BitSearch ss(*m);
-//	ss.nonbinary_search(Heuristic::Var::VRH_DEG_MIN, Heuristic::Val::VLH_MIN, true, TimeLimit);
+//	ss.nonbinary_search(Heuristic::Var::VRH_DEG_MIN, Heuristic::Val::VLH_MIN, false, TimeLimit);
 //	cout << builder.file_name() << endl;
 //	cout << "initial_propagate_time = " << ss.statistics().initial_propagate_time << endl;
 //	cout << "build_time = " << ss.statistics().build_time << endl;
