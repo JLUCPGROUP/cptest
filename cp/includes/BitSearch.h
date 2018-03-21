@@ -78,13 +78,13 @@ namespace cp {
 	class BitSearch {
 	public:
 		BitSearch(const HModel& m);
-		bool initial();
 		void build_nei_model();
 		void build_full_model();
 		bool propagate(const BVal& val);
 		void back_level();
 		bool nonbinary_search(const Heuristic::Var varh, const Heuristic::Val valh, const bool neibor_propagate, const int time_limits);
 		virtual ~BitSearch();
+		void show_stack_top() const;
 		BVal select_BVal(const Heuristic::Var varh, const Heuristic::Val valh) const;
 		int select_BVar(const Heuristic::Var varh) const;
 		int select_value(const int v, const Heuristic::Val valh) const;
@@ -93,6 +93,7 @@ namespace cp {
 		inline int head(const int v, const int p) const;
 		SearchStatistics statistics() const;
 		bool solution_check() const;
+		void show_wdeg() const;
 		int top_;
 		const int limit;
 		const int num_vars;
@@ -107,7 +108,7 @@ namespace cp {
 		double** wdeg;
 		//double** ddeg;
 		//deg启发式保留初始网络的信息
-		double* deg;
+		//double* deg;
 
 		SAC* sac;
 		u64** bit_dom_;
@@ -121,5 +122,7 @@ namespace cp {
 		vector<int> solution_;
 		vector<int> sol_std_;
 		string sol_str;
+		vector<int> deg;
+		vector<int> var_deg_que;
 	};
 }

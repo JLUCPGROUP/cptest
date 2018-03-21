@@ -131,6 +131,7 @@ namespace cp {
 		//}
 		const int v = j.head(p);
 		int b = next_support_bit(i, a, j, v, p);
+
 		while (b != Limits::INDEX_OVERFLOW) {
 			bool pc_witness = true;
 			for (auto k : common_neibor_[i.id][j.id]) {
@@ -155,6 +156,7 @@ namespace cp {
 	}
 
 	bool lMaxRPC_bit_rm::have_pc_wit(const QVar& i, const int a, const QVar& j, int b, const QVar& k, const int p) {
+
 		const auto c_ik = neibor_matrix[i.id][k.id][0];
 		const auto c_jk = neibor_matrix[j.id][k.id][0];
 		const auto cva_ikia = get_QConVal_index(*c_ik, i, a);
@@ -184,11 +186,15 @@ namespace cp {
 	}
 
 	int lMaxRPC_bit_rm::next_support_bit(const QVar& i, const int a, const QVar& j, const int v, const int p) {
+		//由于若传入的v已越界
+		if (v > j.capacity - 1 || v == Limits::INDEX_OVERFLOW)
+			return Limits::INDEX_OVERFLOW;
+
 		const auto c = neibor_matrix[i.id][j.id][0];
 		const int idx_cia = get_QConVal_index(*c, i, a);
 		const auto index = GetBitIdx(v);
-
 		const u64 b = ((bitSup_[idx_cia][index.x] & j.bitDom(p)[index.x]) >> index.y);
+		
 		if (b)
 			return v + FirstOne(b);
 
@@ -197,7 +203,6 @@ namespace cp {
 			if (mask)
 				return GetValue(u, FirstOne(mask));
 		}
-
 
 		return Limits::INDEX_OVERFLOW;
 	}

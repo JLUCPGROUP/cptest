@@ -60,6 +60,9 @@
     <ClCompile Include="STR.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="mac3bit_kway_test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="BMPath.xml">
@@ -75,6 +78,9 @@
     </ClInclude>
     <ClInclude Include="..\includes\BacktrackingSearch.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="commonlint.h">
+      <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

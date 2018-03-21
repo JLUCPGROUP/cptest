@@ -136,14 +136,23 @@ namespace cp {
 			memset(constraint_matrix[i], -1, num_vars * sizeof(int));
 		}
 
-		deg = new double[num_vars]();
-		for (auto x : m.vars)
-			for (auto y : m.vars)
-				if (x != y)
+		//deg = new double[num_vars]();
+		for (auto x : m.vars) {
+			for (auto y : m.vars) {
+				if (x != y) {
 					if (!sac->neibor_matrix[x->id][y->id].empty()) {
 						constraint_matrix[x->id][y->id] = sac->neibor_matrix[x->id][y->id][0]->id;
-						++deg[x->id];
+						//++deg[x->id];
 					}
+					//cout << constraint_matrix[x->id][y->id] << " ";
+				}
+				//printf("%4d", constraint_matrix[x->id][y->id]);
+			}
+			//cout << endl;
+		}
+
+		deg = sac->deg;
+		var_deg_que = sac->var_deg_que;
 
 		wdeg = new double*[num_vars];
 		for (int i = 0; i < num_vars; ++i)
@@ -155,14 +164,7 @@ namespace cp {
 		sol_std_.resize(num_vars);
 	}
 
-	bool BitSearch::initial() {
-		return false;
-	}
-
 	void BitSearch::build_nei_model() {
-		vector<QVar*> x_evt;
-		int del;
-
 		for (auto x : sac->vars) {
 			for (auto a = x->head(0); a != Limits::INDEX_OVERFLOW; x->next_value(a, 0)) {
 				const auto idx = GetBitIdx(a);
@@ -176,6 +178,13 @@ namespace cp {
 		//for (int i = 0; i < num_vars; ++i) {
 		//	memset(bit_dom_[i], ULLONG_MAX, max_bitDom_size * sizeof(u64));
 		//	bit_dom_[i][max_bitDom_size - 1] >>= BITSIZE - limit;
+		//}
+
+		//for (int i = 0; i < num_vars; ++i) {
+		//	for (int j = 0; j < max_bitDom_size; ++j) {
+		//		cout << hex << bit_dom_[i][j] << " ";
+		//	}
+		//	cout << endl;
 		//}
 
 		for (auto c : sac->tabs) {
@@ -229,12 +238,38 @@ namespace cp {
 			}
 		}
 		++top_;
+		//cout << "----" << endl;
+		//for (int i = 0; i < num_vars; i++) {
+		//	for (int j = 0; j < num_vars; ++j) {
+		//		//if (constraint_matrix[i][j] != -1) {
+		//		//	wdeg[i][j] = 1;
+		//		//}
+		//		/*printf("%4d", wdeg[i][j]);*/
+		//		//printf("%4d", constraint_matrix[i][j]);
+		//		if (constraint_matrix[i][j] != -1) {
+		//			//printf("%4d", constraint_matrix[i][j]);
+		//			wdeg[i][j] = 1;
+		//			//printf(" %3.0lf", wdeg[i][j]);
+		//		}
+		//		else {
+		//			//printf("    ");
+		//		}
+		//	}
+		//	//cout << endl;
+		//}
+		//cout << "----" << endl;
+		for (int i = 0; i < num_vars; i++) {
+			for (int j = 0; j < num_vars; ++j) {
+				if (constraint_matrix[i][j] != -1) {
+					wdeg[i][j] = 1;
+				}
+			}
+		}
+		//cout << "----" << endl;
+
 	}
 
 	void BitSearch::build_full_model() {
-
-
-
 
 		vector<QVar*> x_evt;
 		int del;
@@ -260,19 +295,37 @@ namespace cp {
 						const auto idx = GetBitIdx(b);
 						bit_sub_dom_[x->id][a][y->id][idx.x] |= U64_MASK1[idx.y];
 					}
+
+					//if ((y->size(0) != y->size(1))) {
+					//	wdeg[x->id][y->id] = 1;
+					//}
+					//else if (x != y && (y->size(0) == y->size(1))) {
+					//	cout << 1 << endl;
+					//}
 				}
 			}
 		}
 
-		for (int i = 0; i < num_vars; ++i) {
+
+		//////全论域上wdeg都是1
+		//for (int i = 0; i < num_vars; ++i) {
+		//	for (int j = 0; j < num_vars; ++j) {
+		//		//if (i != j) {
+		//			wdeg[i][j] = 1;
+		//			wdeg[j][i] = 1;
+		//		//}
+		//	}
+		//}
+
+		//邻域上wdeg是1
+		for (int i = 0; i < num_vars; i++) {
 			for (int j = 0; j < num_vars; ++j) {
-				if (i != j) {
+				if (constraint_matrix[i][j] != -1) {
 					wdeg[i][j] = 1;
-					wdeg[j][i] = 1;
 				}
 			}
 		}
-		++top_;
+
 
 
 		//for (int i = 0; i < num_vars; ++i) {
@@ -287,32 +340,48 @@ namespace cp {
 		//		cout << endl;
 		//	}
 		//}
+
+		//show_wdeg();
+		++top_;
 	}
 
 	bool BitSearch::propagate(const BVal& val) {
 		const int pre = top_ - 1;;
 		++top_;
 
-		//if (val.v == 14 && val.a == 65) {
-		//	for (int i = 0; i < num_vars; ++i) {
-		//		for (int j = 0; j < max_bitDom_size; ++j) {
-		//			const bitset<64> a(stack_[pre][i][j]);
-		//			const bitset<64> b(bit_sub_dom_[val.v][val.a][i][j]);
-		//			cout << a << " " << b << endl;
-		//		}
-		//	}
-		//}
-
-		for (int i = 0; i < num_vars; ++i) {
-			u64 any = 0;
-			for (int j = 0; j < max_bitDom_size; ++j) {
-				stack_[pre + 1][i][j] = stack_[pre][i][j] & bit_sub_dom_[val.v][val.a][i][j];
-				any |= stack_[pre + 1][i][j];
+		if (neibor_prop) {
+			for (int i = 0; i < num_vars; ++i) {
+				if (constraint_matrix[val.v][i] != -1) {
+					u64 any = 0;
+					for (int j = 0; j < max_bitDom_size; ++j) {
+						stack_[pre + 1][i][j] = stack_[pre][i][j] & bit_sub_dom_[val.v][val.a][i][j];
+						any |= stack_[pre + 1][i][j];
+					}
+					if (!any) {
+						++wdeg[val.v][i];
+						++wdeg[i][val.v];
+						return false;
+					}
+				}
+				else {
+					for (int j = 0; j < max_bitDom_size; ++j) {
+						stack_[pre + 1][i][j] = stack_[pre][i][j];
+					}
+				}
 			}
-			if (!any) {
-				++wdeg[val.v][i];
-				++wdeg[i][val.v];
-				return false;
+		}
+		else {
+			for (int i = 0; i < num_vars; ++i) {
+				u64 any = 0;
+				for (int j = 0; j < max_bitDom_size; ++j) {
+					stack_[pre + 1][i][j] = stack_[pre][i][j] & bit_sub_dom_[val.v][val.a][i][j];
+					any |= stack_[pre + 1][i][j];
+				}
+				if (!any) {
+					++wdeg[val.v][i];
+					++wdeg[i][val.v];
+					return false;
+				}
 			}
 		}
 
@@ -374,6 +443,7 @@ namespace cp {
 				++ss.num_positives;
 				//cout << val << endl;
 				consistent = propagate(val);
+				//show_stack_top();
 			}
 
 			if (consistent) {
@@ -382,6 +452,7 @@ namespace cp {
 					ss.total_time += ss.search_time;
 					++ss.num_sol;
 					get_solution();
+
 					return true;
 				}
 				else {
@@ -435,8 +506,16 @@ namespace cp {
 		for (int i = 0; i < num_vars; ++i)
 			delete[] wdeg[i];
 		delete[] wdeg;
+	}
 
-		delete[] deg;
+	void BitSearch::show_stack_top() const {
+		cout << "stack top = " << top_ - 1 << endl;
+		for (int i = 0; i < num_vars; ++i) {
+			for (int j = 0; j < max_bitDom_size; ++j) {
+				cout << hex << stack_[top_ - 1][i][j] << " ";
+			}
+			cout << endl;
+		}
 	}
 
 	BVal BitSearch::select_BVal(const Heuristic::Var varh, const Heuristic::Val valh) const {
@@ -453,6 +532,8 @@ namespace cp {
 		switch (varh) {
 		case Heuristic::VRH_LEX:
 			return I.size();
+		case Heuristic::VRH_DEG_MIN:
+			return var_deg_que[I.size()];
 		case Heuristic::VRH_DOM_MIN: {
 			for (int i = 0; i < num_vars; ++i) {
 				if (!I.assigned(i)) {
@@ -472,6 +553,37 @@ namespace cp {
 		case Heuristic::VRH_DOM_DDEG_MIN: break;
 		case Heuristic::VRH_DOM_WDEG_MIN:
 		{
+			//if (neibor_prop) {
+			//	//只算邻域
+			//	for (int i = 0; i < num_vars; ++i) {
+			//		if (!I.assigned(i)) {
+			//			const double cur_size = size(i, top_ - 1);
+			//			if (cur_size == 1)
+			//				return i;
+			//			double i_dom_wdeg = 0.0;
+			//			double i_wdeg = 0;
+
+			//			for (int j = 0; j < num_vars; ++j) {
+			//				if (constraint_matrix[i][j] != -1) {
+			//					if (!I.assigned(j))
+			//						i_wdeg += wdeg[i][j];
+
+			//					if (i_wdeg == 0)
+			//						return i;
+			//					else
+			//						i_dom_wdeg = cur_size / i_wdeg;
+
+			//					if (i_dom_wdeg < min_size) {
+			//						min_size = i_dom_wdeg;
+			//						var = i;
+			//					}
+			//				}
+
+			//			}
+			//		}
+			//	}
+			//}
+			//else {
 			for (int i = 0; i < num_vars; ++i) {
 				if (!I.assigned(i)) {
 					const double cur_size = size(i, top_ - 1);
@@ -495,6 +607,8 @@ namespace cp {
 					}
 				}
 			}
+			//}
+
 		}return var;
 		default:;
 		}
@@ -555,6 +669,16 @@ namespace cp {
 
 	bool BitSearch::solution_check() const {
 		return sac->solution_check();
+	}
+
+	void BitSearch::show_wdeg() const {
+		for (int i = 0; i < num_vars; i++) {
+			for (int j = 0; j < num_vars; ++j) {
+				printf(" %3.0lf", wdeg[i][j]);
+			}
+			cout << endl;
+		}
+		cout << "--------------------------" << endl;
 	}
 
 	string BitSearch::get_solution_str() {

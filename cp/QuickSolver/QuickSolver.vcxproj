@@ -147,6 +147,7 @@
     <ClCompile Include="lMaxRPC_bit_rm.cpp" />
     <ClCompile Include="MAC3.cpp" />
     <ClCompile Include="MAC3bit.cpp" />
+    <ClCompile Include="mac3bit_kway_test.cpp" />
     <ClCompile Include="mac3bit_test.cpp" />
     <ClCompile Include="MAC3rm.cpp" />
     <ClCompile Include="main.cpp" />
@@ -165,6 +166,7 @@
     <ClInclude Include="..\includes\BacktrackingSearch.h" />
     <ClInclude Include="..\includes\BitSearch.h" />
     <ClInclude Include="..\includes\QModel.h" />
+    <ClInclude Include="commonlint.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

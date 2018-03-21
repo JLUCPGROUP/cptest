@@ -14,6 +14,8 @@ namespace cp {
 		virtual PropagationState propagate(vector<QVar*>& x_evt, const int level) = 0;
 
 		virtual SearchStatistics binary_search(const Heuristic::Var varh, const Heuristic::Val valh, const int time_limits);
+		virtual SearchStatistics nonbinary_search(const Heuristic::Var varh, const Heuristic::Val valh, const int time_limits);
+
 		QVal select_QVal(const Heuristic::Var varh, const Heuristic::Val valh, const int p);
 		QVar* select_QVar(const Heuristic::Var varh, const int p);
 		int select_value(const QVar& v, const Heuristic::Val valh, const int p);
@@ -23,6 +25,8 @@ namespace cp {
 		vector<u64> con_stamp;
 		vector<u64> var_stamp;
 		vector<double> con_weight;
+		vector<int> var_deg_que;
+		vector<int> deg;
 		u64 time = 0;
 		//unordered_map<QVar*, vector<QTab*>> subscription;
 		//unordered_map<QVar*, vector<QVar* >> neighborhood;
@@ -47,6 +51,7 @@ namespace cp {
 		vars_heap q_;
 		vector<QVar*> get_scope(const HTab& t);
 		vector<QVar*> get_neighbor(const QVar& v);
+		static inline void next_val(QVal& val, const int p);
 		void get_solution();
 		const int max_arity;
 		const int max_dom_size;

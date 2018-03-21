@@ -155,6 +155,7 @@ namespace cp {
 			VRH_LEX,
 			VRH_DOM_MIN,
 			VRH_VWDEG,
+			VRH_DEG_MIN,
 			VRH_DOM_DEG_MIN,
 			VRH_DOM_DDEG_MIN,
 			VRH_DOM_WDEG_MIN

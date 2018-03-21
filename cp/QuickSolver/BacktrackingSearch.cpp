@@ -3,8 +3,16 @@
 #include "BacktrackingSearch.h"
 #include <set>
 #include <sstream>
+#include <map>
 
 namespace  cp {
+	typedef pair<int, int> PAIR;
+	struct CmpByValue {
+		bool operator()(const PAIR& lhs, const PAIR& rhs) const {
+			return lhs.second > rhs.second;
+		}
+	};
+
 	int BacktrackingSearch::new_level() {
 		++top_;
 		for (auto v : vars)
@@ -36,6 +44,10 @@ namespace  cp {
 		return vector<QVar*>(vs.begin(), vs.end());
 	}
 
+	inline void BacktrackingSearch::next_val(QVal& val, const int p) {
+		val.v->next_value(val.a, p);
+	}
+
 	void BacktrackingSearch::get_solution() {
 		for (int i = 0; i < num_vars; ++i) {
 			solution_[i] = vars[i]->vals[I.v_[i]];
@@ -58,6 +70,8 @@ namespace  cp {
 		tabs.reserve(num_tabs);
 		subscription.resize(num_tabs);
 		neighborhood.resize(num_vars);
+		deg.resize(num_vars, 0);
+		var_deg_que.resize(num_vars);
 
 		for (auto hv : h.vars) {
 			auto*v = new QVar(hv);
@@ -71,10 +85,25 @@ namespace  cp {
 			tabs.push_back(t);
 		}
 
+		//变量参与的约束
 		for (const auto t : tabs)
 			for (auto v : t->scope)
 				subscription[v->id].push_back(t);
+		list<QVar*> q;
+		map<int, int> var_map;
+		for (int i = 0; i < num_vars; i++) {
+			deg[i] = subscription[i].size();
+			var_map[i] = deg[i];
+			//cout << deg[i] << endl;
+		}
 
+		vector<PAIR> score(var_map.begin(), var_map.end());
+		sort(score.begin(), score.end(), CmpByValue());
+
+		for (int i = 0; i < num_vars; ++i) {
+			var_deg_que[i] = score[i].first;
+			//cout << var_deg_que[i] << endl;
+		}
 
 		//初始化约束查找矩阵
 		neibor_matrix.resize(num_vars, vector<vector<QTab*>>(num_vars, vector<QTab*>()));
@@ -262,6 +291,66 @@ namespace  cp {
 		return ss_;
 	}
 
+	SearchStatistics BacktrackingSearch::nonbinary_search(const Heuristic::Var varh, const Heuristic::Val valh, const int time_limits) {
+		Timer t;
+		vector<QVar*> x_evt;
+		bool consistent_ = propagate(vars, 0).state;
+		x_evt.clear();
+		bool finished_ = false;
+		if (!consistent_) {
+			ss_.solve_time = t.elapsed();
+			return ss_;
+		}
+		QVal val = select_QVal(varh, valh, 0);
+		//		const QVal NullNode = QVal(nullptr, -2);
+		while ((!I.empty()) || !val.is_null_node()) {
+			//search time out
+			if (t.elapsed() > time_limits) {
+				ss_.solve_time = t.elapsed();
+				ss_.time_out = true;
+				return ss_;
+			}
+
+			// val is exist
+			if (!val.is_null_node()) {
+				//cout << val << endl;
+				top_ = new_level();
+				I.push(val);
+				++ss_.num_positives;
+				val.v->reduce_to(val.a, top_);
+				x_evt.push_back(val.v);
+				consistent_ = propagate(x_evt, top_).state;
+				x_evt.clear();
+
+			}
+
+			if (consistent_) {
+				if (I.full()) {
+					//meet solution
+					ss_.solve_time = t.elapsed();
+					get_solution();
+					return ss_;
+				}
+				else {
+					// select v-value
+					val = select_QVal(varh, valh, top_);
+				}
+			}
+
+			if (!consistent_) {
+				//backtracking
+				back_level();
+				val = I.pop();
+				next_val(val, top_);
+				//cout << "next: ";
+			}
+
+		}
+
+		ss_.solve_time = t.elapsed();
+		return ss_;
+	}
+
 	QVal BacktrackingSearch::select_QVal(const Heuristic::Var varh, const Heuristic::Val valh, const int p) {
 		QVar* v = select_QVar(varh, p);
 		const int a = select_value(*v, valh, p);
@@ -282,7 +371,10 @@ namespace  cp {
 					}
 		} return var;
 		case Heuristic::VRH_LEX:
-			var = vars[I.size() + 1];
+			var = vars[I.size()];
+			break;
+		case Heuristic::VRH_DEG_MIN:
+			var = vars[var_deg_que[I.size()]];
 			break;
 		case Heuristic::VRH_VWDEG: break;
 		case Heuristic::VRH_DOM_DEG_MIN: {

@@ -38,7 +38,7 @@ namespace cp {
 		void copy_level(const int src, const int dest) const;
 		//inline int new_level(int src);
 		void new_level(const int src, const int dest) const;
-
+		//int max_value(const int p);
 		const int id;
 		const int capacity;
 		const int limit;
@@ -64,6 +64,7 @@ namespace cp {
 		const QVal& operator=(const QVal& rhs);
 		void flip();
 		QVal next() const;
+		bool is_null_node() const;
 		bool operator==(const QVal& rhs);
 		bool operator!=(const QVal& rhs);
 		friend std::ostream& operator<< (std::ostream &os, QVal &v_val);

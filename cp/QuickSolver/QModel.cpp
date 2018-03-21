@@ -136,6 +136,10 @@ namespace cp {
 		size_[dest] = size_[src];
 	}
 
+	//int QVar::max_value(const int p)
+	//{
+	//}
+
 	//////////////////////////////////////////////////////////////////////////////
 	const QVal& QVal::operator=(const QVal& rhs) {
 		v = rhs.v;
@@ -150,6 +154,10 @@ namespace cp {
 
 	QVal QVal::next() const {
 		return QVal(v, a + 1, true);
+	}
+
+	bool QVal::is_null_node() const {
+		return a == Limits::INDEX_OVERFLOW;
 	}
 
 	bool QVal::operator==(const QVal & rhs) {
