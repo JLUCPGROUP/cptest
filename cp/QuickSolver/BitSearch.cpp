@@ -550,7 +550,32 @@ namespace cp {
 		}
 		case Heuristic::VRH_VWDEG: break;
 		case Heuristic::VRH_DOM_DEG_MIN: break;
-		case Heuristic::VRH_DOM_DDEG_MIN: break;
+		case Heuristic::VRH_DOM_DDEG_MIN:
+		{
+			for (int i = 0; i < num_vars; ++i) {
+				if (!I.assigned(i)) {
+					const double cur_size = size(i, top_ - 1);
+					if (cur_size == 1)
+						return i;
+					double i_dom_ddeg;
+					double i_ddeg = 0;
+
+					for (int j = 0; j < num_vars; ++j)
+						if (!I.assigned(j) && constraint_matrix[i][j] != -1)
+							++i_ddeg;
+
+					if (i_ddeg == 0)
+						return i;
+					else
+						i_dom_ddeg = cur_size / i_ddeg;
+
+					if (i_dom_ddeg < min_size) {
+						min_size = i_dom_ddeg;
+						var = i;
+					}
+				}
+			}
+		}
 		case Heuristic::VRH_DOM_WDEG_MIN:
 		{
 			//if (neibor_prop) {

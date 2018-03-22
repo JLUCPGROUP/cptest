@@ -401,19 +401,28 @@ namespace  cp {
 					double ddeg = 0;
 					double d_ddeg;
 					for (auto c : subscription[x->id]) {
-						double cnt = 0;
 						for (auto y : c->scope) {
 							if (y != x) {
 								if (!I.assigned(*y)) {
-									ddeg++;
+									++ddeg;
 									break;
 								}
 							}
 						}
 					}
+
+					if (ddeg == 0)
+						return x;
+					else
+						d_ddeg = cur_size / ddeg;
+
+					if (d_ddeg < min_size) {
+						min_size = d_ddeg;
+						var = x;
+					}
 				}
 			}
-		}
+		}return var;
 		case Heuristic::VRH_DOM_WDEG_MIN: {
 			for (auto x : vars) {
 				if (!I.assigned(*x)) {
