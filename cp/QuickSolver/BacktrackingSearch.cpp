@@ -402,11 +402,9 @@ namespace  cp {
 					double d_ddeg;
 					for (auto c : subscription[x->id]) {
 						for (auto y : c->scope) {
-							if (y != x) {
-								if (!I.assigned(*y)) {
-									++ddeg;
-									break;
-								}
+							if ((y != x) && !I.assigned(*y)) {
+								++ddeg;
+								break;
 							}
 						}
 					}

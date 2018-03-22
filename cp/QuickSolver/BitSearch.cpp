@@ -564,7 +564,7 @@ namespace cp {
 						if (!I.assigned(j) && constraint_matrix[i][j] != -1)
 							++i_ddeg;
 
-					if (i_ddeg == 0)
+					if (!i_ddeg)
 						return i;
 					else
 						i_dom_ddeg = cur_size / i_ddeg;

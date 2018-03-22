@@ -8,7 +8,7 @@
     <!--<BMFile id ="0">E:\Projects\benchmarks\tightness0.5\rand-2-40-25-180-500-39_ext.xml</BMFile>-->
     <!--<BMFile id ="0">E:/Projects/benchmarks/tightness0.8/rand-2-40-80-103-800-55_ext.xml</BMFile>-->
     <!--<BMFile id ="0">E:/Projects/benchmarks/tightness0.1/rand-2-40-8-753-100-00_ext.xml</BMFile>-->
-    <BMFile id ="0">C:\test\rand-2-23\rand-23-23-253-131-48021_ext.xml</BMFile>
+    <BMFile id ="0">E:/Projects/benchmarks/rand-2-23/rand-23-23-253-131-48021_ext.xml</BMFile>
     <!--<BMFile id ="0">E:/Projects/benchmarks/qk_com/queensKnights-8-5-add_ext.xml</BMFile>-->
   </BMFiles>
 </BenchMark>

@@ -68,7 +68,7 @@
 //#ifdef LOGFILE
 //	lofi << avg_ts << endl;
 //	lofi << avg_tn << endl;
-//	lofi << to << endl;
+//	lofi << to <<"M"<< endl;
 //	lofi.close();
 //#endif
 //	return 0;
