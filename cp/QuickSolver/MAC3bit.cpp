@@ -1,7 +1,7 @@
 ﻿#include "BacktrackingSearch.h"
 namespace cp {
 	MAC3bit::MAC3bit(const HModel& h, const bool backtrackable) :
-	BacktrackingSearch(h, backtrackable){
+		BacktrackingSearch(h, backtrackable) {
 		bitSup_ = new u64*[num_cva];
 		for (size_t i = 0; i < num_cva; i++)
 			bitSup_[i] = new u64[max_bitDom_size]();
@@ -82,12 +82,37 @@ namespace cp {
 	inline bool MAC3bit::seek_support(const QTab& c, const QVar& v, const int a, const int p) const {
 		const int idx = get_QConVal_index(c, v, a);
 		for (QVar* y : c.scope)
-			if (y->id != v.id)
+			if (y->id != v.id) {
+				//cout << y->id << " " << v.id << endl;
 				for (int i = 0; i < y->num_bit; ++i)
 					if (bitSup_[idx][i] & y->bitDom(p)[i])
 						return true;
+			}
 		return false;
 	}
 
+	bool MAC3bit::revise(const QVar& y, const QTab& c, const QVar& v, const int level) {
+		QVar* x = (c.scope[0]->id == v.id) ? c.scope[1] : c.scope[0];
+		++ss_.num_revisions;
+		const int num_elements = v.size(level);
+		int a = v.head(level);
+		while (a != Limits::INDEX_OVERFLOW) {
+			if (!seek_support(*x, c, v, a, level)) {
+				v.remove_value(a, level);
+				//cout << "(" << v.id << ", " << a << ")" << endl;
+				++ps_.num_delete;
+			}
+			a = v.next(a, level);
+		}
+		return num_elements != v.size(level);
+	}
 
+	bool MAC3bit::seek_support(const QVar& y, const QTab& c, const QVar& v, const int a, const int p) const {
+		//cout << y.id << " " << v.id << endl;
+		const int idx = get_QConVal_index(c, v, a);
+		for (int i = 0; i < y.num_bit; ++i)
+			if (bitSup_[idx][i] & y.bitDom(p)[i])
+				return true;
+		return false;
+	}
 }

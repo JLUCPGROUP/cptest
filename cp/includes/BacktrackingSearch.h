@@ -44,6 +44,7 @@ namespace cp {
 		vector<vector<int>> solutions;
 		string get_solution_str();
 		bool solution_check();
+
 		string sol_str;
 		vector<int> sol_std;
 	protected:
@@ -85,6 +86,18 @@ namespace cp {
 		inline bool seek_support(const QTab& c, const QVar& v, const int a, const int p);
 	};
 
+	class MAC3_matrix :public BacktrackingSearch {
+	public:
+		MAC3_matrix(const HModel& h, const bool backtrackable = true);
+		virtual ~MAC3_matrix();
+		PropagationState propagate(vector<QVar*>& x_evt, const int level) override;
+		inline bool revise(const QTab& c, const QVar& v, const int level);
+		inline bool seek_support(const QTab& c, const QVar& v, const int a, const int p);
+		inline bool is_consistent(const QVar& x, const int a, const QVar& y, const int b);
+	private:
+		vector<vector<vector<vector<int>>>> rel_;
+	};
+
 	class MAC3bit :public BacktrackingSearch {
 	public:
 		MAC3bit(const HModel& h, const bool backtrackable = true);
@@ -92,6 +105,9 @@ namespace cp {
 		inline PropagationState propagate(vector<QVar*>& x_evt, const int level) override;
 		inline bool revise(const QTab& c, const QVar& v, const int level);
 		inline bool seek_support(const QTab& c, const QVar& v, const int a, const int p) const;
+		inline bool revise(const QVar& y, const QTab& c, const QVar& v, const int level);
+		inline bool seek_support(const QVar& y, const QTab& c, const QVar& v, const int a, const int p) const;
+
 	protected:
 		u64 * * bitSup_;
 	};
@@ -150,8 +166,75 @@ namespace cp {
 		u64 * * bitSup_;
 		//PropagationState ac_ps_;
 	};
-
-	class STR1 :public BacktrackingSearch {
-		STR1(const HModel h, const bool backtrackable = true);
+	class AC3withSAC1bitprocessing :public SAC {
+	public:
+		AC3withSAC1bitprocessing(const HModel& h, const bool backtrackable = true);
+		//virtual bool enforce_ac(vector<QVar*>& x_evt, const int level) = 0;
+		virtual ~AC3withSAC1bitprocessing();
+		SearchStatistics binary_search(const Heuristic::Var varh, const Heuristic::Val valh, const int time_limits) override;
+		inline PropagationState propagate(vector<QVar*>& x_evt, const int level) override;
+		inline PropagationState enforce_sac(vector<QVar*>& x_evt, const int level);
+		inline bool enforce_ac(vector<QVar*>& x_evt, int& del, const int level) override;
+		inline int revise(const QTab& c, const QVar& v, const int level) const;
+		inline bool seek_support(const QTab& c, const QVar& v, const int a, const int p) const;
+	protected:
+		u64 * * bitSup_;
+		//PropagationState ac_ps_;
 	};
+
+
+	class RPC3 : public BacktrackingSearch {
+	public:
+		RPC3(const HModel& h, const bool backtrackable = true);
+		~RPC3() {};
+
+		PropagationState propagate(vector<QVar*>& x_evt, const int p) override;
+		bool is_consistent(const QVar& x, const int a, const QVar& y, const int b);
+		bool is_consistent(const QTab& c, const QVar& x, const int a, const QVar& y, const int b);
+		int find_two_support(const QVar& i, const int a, const QVar& y, const int r, const int p);
+	protected:
+		//u64 * * bitSup_;
+		//vars_heap q_nei_;
+		//vector<vector<QTab*>> N;
+		//vector<int> var_mark_;
+		vars_pair_cir_que con_que_;
+		vector<vector<vector<int>>> r_1_, r_2_;
+		//vector<vector<vector<int>>> rel_;
+		vector<vector<vector<vector<int>>>> rel_;
+		vector<vector<vector<QVar*>>> common_neibor_;
+	};
+
+	class RNSQ :public BacktrackingSearch {
+	public:
+		RNSQ(const HModel& h, const bool backtrackable = true);
+		~RNSQ();
+
+		int neibor_ac(const QVar& v, int p);
+		PropagationState propagate(vector<QVar*>& x_evt, const int p) override;
+		int revise_NSAC(QVar& v, QVar& x, const int p);
+		bool full_NSAC(QVar& v, QVar& x, const int p);
+		inline bool is_neibor(QVar& x, QVar& y);
+		//=0 dwo detected
+		//=1 singleton domain
+		//=2 otherwise
+		int condition_fc(QVar& v, const int a, const int p);
+		inline bool revise(const QTab& c, const QVar& v, const int level);
+		//inline bool revise(const QVar& y, const QVar& x, const int level);
+
+		//inline bool revise(const QVar& x, const QTab& c, const QVar& v, const int level);
+		inline bool seek_support(const QVar& y, const QTab& c, const int v_idx, const int a, const int p) const;
+		inline bool seek_support(const QVar& x, const QTab& c, const QVar& v, const int a, const int p) const;
+
+		//inline bool seek_support(const QTab& c, const QVar& v, const int a, const int p) const;
+
+	protected:
+		u64 * * bitSup_;
+		vars_heap q_nei_;
+		vector<vector<QTab*>> N;
+		vector<int> var_mark_;
+	};
+
+	//class STR1 :public BacktrackingSearch {
+	//	STR1(const HModel h, const bool backtrackable = true);
+	//};
 }

@@ -63,6 +63,21 @@
     <ClCompile Include="mac3bit_kway_test.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="ACwithSACprocessing.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="RNSAC.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="rnsac_test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="RPC3.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MAC3_matrix.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="BMPath.xml">
@@ -80,7 +95,7 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="commonlint.h">
-      <Filter>头文件</Filter>
+      <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -4,7 +4,6 @@
 #include "XBuilder.h"
 
 namespace cp {
-
 	inline bool Existed(vector<int>& tuple) {
 		return tuple[0] != INT_MAX;
 	}
@@ -108,6 +107,11 @@ namespace cp {
 		int max_size_;
 	};
 
+	struct variable_pair {
+		QVar* x;
+		QVar* y;
+	};
+
 	class vars_cir_que {
 	public:
 		vars_cir_que() {}
@@ -202,6 +206,110 @@ namespace cp {
 		QTab* c;
 		QVar* v;
 		int a;
+	};
+
+	//template<class T>
+	//class cir_que {
+	//public:
+	//	//int& have(const IntVar* v) { return id_set_[v->id()]; };
+	//	cir_que() {}
+	//	//var_que(Network* n);
+	//	virtual ~cir_que() {};
+
+	//	//void initial(Network* n);
+	//	//void DeleteQue();
+	//	//bool have(IntVar* v);
+	//	bool empty() const {
+	//		return m_front_ == m_rear_;
+	//	}
+
+	//	void initial(const int size) {
+	//		max_size_ = size + 1;
+	//		m_data_.resize(max_size_, nullptr);
+	//		id_set_.resize(max_size_, 0);
+	//		m_front_ = 0;
+	//		m_rear_ = 0;
+	//		size_ = 0;
+	//	}
+
+	//	bool full() const {
+	//		return m_front_ == (m_rear_ + 1) % max_size_;
+	//	}
+
+	//	void push(const T a) {
+	//		if (id_set_[a->id])
+	//			return;
+	//		m_data_[m_rear_] = a;
+	//		m_rear_ = (m_rear_ + 1) % max_size_;
+	//		id_set_[a->id] = 1;
+	//		++size_;
+	//	}
+
+	//	void clear_and_push(const vector<T>& s) {
+	//		//清空原有的标记
+	//		id_set_.assign(id_set_.size(), 0);
+	//		//根据传入重新标记
+	//		for (auto& a : s)
+	//			id_set_[a->id] = 1;
+	//		m_data_.assign(s.size(), s.begin());
+	//		m_front_ = 0;
+	//		m_rear_ = s.size();
+	//		size_ = s.size();
+	//	}
+
+	//	T pop() {
+	//		T tmp = m_data_[m_front_];
+	//		m_front_ = (m_front_ + 1) % max_size_;
+	//		id_set_[tmp->id] = 0;
+	//		--size_;
+	//		return tmp;
+	//	}
+
+	//	void clear() {
+	//		m_front_ = 0;
+	//		m_rear_ = 0;
+	//		size_ = 0;
+	//		id_set_.assign(id_set_.size(), 0);
+	//	}
+
+	//	int max_size() const {
+	//		return max_size_;
+	//	}
+
+	//	int size() const {
+	//		return size_;
+	//	}
+
+	//private:
+	//	vector<T> m_data_;
+	//	vector<int> id_set_;
+	//	size_t max_size_;
+	//	int m_front_;
+	//	int m_rear_;
+	//	int size_;
+	//};
+	class vars_pair_cir_que {
+	public:
+		vars_pair_cir_que(){};
+		virtual ~vars_pair_cir_que() {};
+
+		bool empty() const;
+		void initial(const int size);
+		bool full() const;
+		void push(variable_pair vv);
+		variable_pair pop();
+		void clear();
+		int max_size() const;
+		int size() const;
+
+	private:
+		vector<variable_pair> m_data_;
+		vector<vector<int>> id_set_;
+		size_t max_size_;
+		int m_front_;
+		int m_rear_;
+		int size_;
+		int num_vars_;
 	};
 
 	struct PropagationState {

@@ -237,6 +237,16 @@ namespace cp {
 	}
 
 
+	//class dynamic_bitset {
+	//public:
+	//	dynamic_bitset(const int n);
+	//	~dynamic_bitset();
+	//	const int limit;
+	//	const int num_bit;
+	//protected:
+	//	u64 * data_;
+	//};
+
 	/**
 	* \brief 表约束语义
 	*/

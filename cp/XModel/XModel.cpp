@@ -2,6 +2,11 @@
 
 
 namespace cp {
+	//dynamic_bitset::dynamic_bitset(const int n) :limit()
+	//{
+
+	//}
+
 XDom::XDom(const int id, const int num_vals, char* val_str) :
 	id(id) {
 	vals.resize(num_vals);

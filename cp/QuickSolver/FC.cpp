@@ -67,8 +67,8 @@
 //	const double avg_tn = tn / files.size() / 1000000;
 //#ifdef LOGFILE
 //	lofi << avg_ts << endl;
-//	lofi << avg_tn << endl;
-//	lofi << to << "M" << endl;
+//	lofi << avg_tn << "M" << endl;
+//	lofi << to << endl;
 //	lofi.close();
 //#endif
 //	return 0;
