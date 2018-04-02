@@ -149,9 +149,11 @@ namespace cp {
 							con_que_.push(variable_pair{ z,vp.x });
 						}
 						//for (const auto w : neighborhood[z->id]) {
-						//	auto c = neibor_matrix[w->id][vp.x->id];
-						//	if (w != vp.x&&c.empty()) {
-						//		con_que_.push(variable_pair{ w,z });
+						//	if (!I.assigned(*w) && w != vp.x) {
+						//		auto c = neibor_matrix[w->id][vp.x->id];
+						//		if (!c.empty()) {
+						//			con_que_.push(variable_pair{ w,z });
+						//		}
 						//	}
 						//}
 					}
