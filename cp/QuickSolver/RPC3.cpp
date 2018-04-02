@@ -1,5 +1,4 @@
 ﻿#include "BacktrackingSearch.h"
-#include <set>
 
 namespace cp {
 	RPC3::RPC3(const HModel& h, const bool backtrackable) :BacktrackingSearch(h, backtrackable) {
@@ -37,6 +36,29 @@ namespace cp {
 				rel_[y][x][t[1]][t[0]] = true;
 			}
 		}
+
+		//for (QTab* c : tabs) {
+		//	const int x = c->scope[0]->id;
+		//	const int y = c->scope[1]->id;
+		//	cout << "------------------------" << endl;
+		//	cout << "c:" << c->id << "; x = " << x << "; y=" << y << endl;
+		//	for (size_t i = 0; i < max_dom_size; i++) {
+		//		for (size_t j = 0; j < max_dom_size; j++) {
+		//			cout << rel_[x][y][i][j] << " ";
+		//		}
+		//		cout << endl;
+		//	}
+		//	cout << endl;
+
+		//	for (size_t i = 0; i < max_dom_size; i++) {
+		//		for (size_t j = 0; j < max_dom_size; j++) {
+		//			cout << rel_[y][x][j][i] << " ";
+		//		}
+		//		cout << endl;
+		//	}
+		//	cout << endl;
+		//}
+
 		/////
 		//q_nei_.initial(num_vars);
 		//N.resize(num_vars);
@@ -75,22 +97,24 @@ namespace cp {
 			//con_que_.clear_and_push(subscription[x_evt[0]->id]);
 			const auto x = x_evt[0];
 			for (auto y : neighborhood[x->id]) {
-				con_que_.push(variable_pair{ y,x });
-				con_que_.push(variable_pair{ x,y });
+				if (!I.assigned(*y))
+					con_que_.push(variable_pair{ y,x });
+				//con_que_.push(variable_pair{ x,y });
 			}
 		}
 		int R;
 
 		while (!con_que_.empty()) {
 			const auto vp = con_que_.pop();
-			cout << "pop:" << vp.x->id << "," << vp.y->id << endl;
+			//cout << "pop:" << vp.x->id << "," << vp.y->id << endl;
 			bool deletion = false;
 			for (auto a = vp.x->head(p); a != Limits::INDEX_OVERFLOW; vp.x->next_value(a, p)) {
-				cout << "test: (" << vp.x->id << "," << a << ")" << endl;
+				//cout << "test: (" << vp.x->id << "," << a << ")" << endl;
 				const bool valid[] = {
 					vp.y->have(r_1_[vp.x->id][a][vp.y->id], p),
 					vp.y->have(r_2_[vp.x->id][a][vp.y->id], p) };
-
+				//cout << "r1[" << vp.x->id << "," << a << "," << vp.y->id << "] = " << r_1_[vp.x->id][a][vp.y->id] << ":" << valid[0] << endl;
+				//cout << "r2[" << vp.x->id << "," << a << "," << vp.y->id << "] = " << r_2_[vp.x->id][a][vp.y->id] << ":" << valid[1] << endl;
 				//both r valid
 				if (valid[0] && valid[1]) {
 					continue;
@@ -106,10 +130,10 @@ namespace cp {
 						R = Limits::INDEX_OVERFLOW;
 					}
 
-					cout << "find_two_support(" << vp.x->id << "," << a << "," << vp.y->id << "," << R << ")" << endl;
+					//cout << "find_two_support(" << vp.x->id << "," << a << "," << vp.y->id << "," << R << ")" << endl;
 					if (!find_two_support(*vp.x, a, *vp.y, R, p)) {
 						vp.x->remove_value(a, p);
-						cout << "remove P:" << p << ":" << vp.x->id << "," << a << endl;
+						//cout << "remove P:" << p << ":" << vp.x->id << "," << a << endl;
 						deletion = true;
 					}
 				}
@@ -121,7 +145,9 @@ namespace cp {
 
 				if (deletion) {
 					for (const auto z : neighborhood[vp.x->id]) {
-						con_que_.push(variable_pair{ z,vp.x });
+						if (!I.assigned(*z)) {
+							con_que_.push(variable_pair{ z,vp.x });
+						}
 						//for (const auto w : neighborhood[z->id]) {
 						//	auto c = neibor_matrix[w->id][vp.x->id];
 						//	if (w != vp.x&&c.empty()) {
@@ -136,7 +162,7 @@ namespace cp {
 		return ps_;
 	}
 	bool RPC3::is_consistent(const QVar& x, const int a, const QVar& y, const int b) {
-		cout << "      consistent check:(" << x.id << "," << a << ")~(" << y.id << "," << b << ") =>" << rel_[x.id][y.id][a][b] << endl;
+		//cout << "      consistent check:(" << x.id << "," << a << ")~(" << y.id << "," << b << ") =>" << rel_[x.id][y.id][a][b] << endl;
 		return rel_[x.id][y.id][a][b];
 	}
 
@@ -148,127 +174,136 @@ namespace cp {
 	//}
 
 	int RPC3::find_two_support(const QVar& x, const int a, const QVar& y, const int r, const int p) {
+		//cout << "----FTS_1-----" << endl;
 		bool one_support = (r != Limits::INDEX_OVERFLOW);
 		//const auto c_xy = neibor_matrix[x.id][y.id][0];
 
-		auto b = Limits::INDEX_OVERFLOW;
-		for (auto last_b = y.head(p); last_b != Limits::INDEX_OVERFLOW; y.next_value(last_b, p)) {
-			b = last_b;
-			cout << "test: (" << x.id << "," << a << ")-(" << y.id << "," << last_b << ")" << endl;
+		for (auto b = y.head(p); b != Limits::INDEX_OVERFLOW; y.next_value(b, p)) {
+			//cout << "  test: (" << x.id << "," << a << ")-(" << y.id << "," << last_b << ")" << endl;
 
 			//L4
-			if (is_consistent(x, a, y, last_b)) {
-				cout << "consistent" << endl;
+			if (is_consistent(x, a, y, b)) {
+				//cout << "consistent" << endl;
 				if (!one_support) {
 					//L5 若一个支持都没有，放在r1
-					cout << "1 support" << endl;
+					//cout << "  1 support" << endl;
 					one_support = true;
-					r_1_[x.id][a][y.id] = last_b;
+					r_1_[x.id][a][y.id] = b;
 				}
 				else {
 					//有一个支持放在r2
-					cout << "2 support" << endl;
-					if (last_b != r) {
-						r_2_[x.id][a][y.id] = last_b;
+					//cout << "  2 support" << endl;
+					if (b != r) {
+						r_2_[x.id][a][y.id] = b;
 						return true;
+					}
+					else {
+						r_1_[x.id][a][y.id] = b;
+						r_2_[x.id][a][y.id] = Limits::INDEX_OVERFLOW;
 					}
 				}
 
 			}
 		}
-		cout << "---------" << endl;
+
+		//cout << "----FTS_2_1S-----" << endl;
 		//若单个支持 则要为(ai,aj)检查pc
 		//singleton
 		if (!one_support) {
 			//无支持
-			cout << "no support" << endl;
+			//cout << "  no support" << endl;
 			return false;
 		}
 		else {
 			//单个支持
-			b = r_1_[x.id][a][y.id];
+			const int b = r_1_[x.id][a][y.id];
+			//b=last_b
 
-			cout << "1 support, seek pc" << endl;
+			//cout << "  1 support, seek pc" << endl;
 			for (auto z : common_neibor_[x.id][y.id]) {
-				cout << "pcw: " << z->id << endl;
+				//cout << "  pcw: " << z->id << endl;
 				const bool valid[] = {
 					z->have(r_1_[x.id][a][z->id],p),
 					z->have(r_2_[x.id][a][z->id],p),
 					z->have(r_1_[y.id][b][z->id], p),
 					z->have(r_2_[y.id][b][z->id], p) };
 				//R[x,a,z]有一个有效，并且该有效R与y,b相容
-				if (valid[0] || valid[1]) {
-					if (valid[0]) {
-						cout << "    valid[0]: (" << z->id << "," << r_1_[x.id][a][z->id] << endl;
-						//并且该有效R与y,b相容
-						if (is_consistent(y, b, *z, r_1_[x.id][a][z->id])) {
-							cout << "   consistent" << endl;
-							continue;
-						}
-						else {
-							cout << "   inconsistent" << endl;
-						}
+				//if (valid[0] || valid[1]) {
+					//if (is_consistent(y, b, *z, r_1_[x.id][a][z->id])||is_consistent(y, b, *z, r_2_[x.id][a][z->id])) {
+					//	//cout << "   consistent" << endl;
+					//	continue;
+					//}
+				if (valid[0]) {
+					//cout << "    valid[0]: (" << z->id << "," << r_1_[x.id][a][z->id] << endl;
+					//并且该有效R与y,b相容
+					if (is_consistent(y, b, *z, r_1_[x.id][a][z->id])) {
+						//cout << "   consistent" << endl;
+						continue;
 					}
-
-					if (valid[1]) {
-						cout << "    valid[1]: (" << z->id << "," << r_2_[x.id][a][z->id] << endl;
-						//并且该有效R与y,b相容
-						if (is_consistent(y, b, *z, r_2_[x.id][a][z->id])) {
-							cout << "   consistent" << endl;
-							continue;
-						}
-						else {
-							cout << "   inconsistent" << endl;
-						}
-
-
+					else {
+						//cout << "   inconsistent" << endl;
 					}
-					//如果两个都valid那么上一个
 				}
-				///////////////////////////////////
 
-				if (valid[2] || valid[3]) {
-					cout << "    valid[2]: (" << z->id << "," << r_1_[y.id][b][z->id] << endl;
-					if (valid[2]) {
-						//并且该有效R与x,a相容
-						if (is_consistent(x, a, *z, r_1_[y.id][b][z->id])) {
-							cout << "   consistent" << endl;
-							continue;
-						}
-						else {
-							cout << "   inconsistent" << endl;
-						}
-
+				if (valid[1]) {
+					//cout << "    valid[1]: (" << z->id << "," << r_2_[x.id][a][z->id] << endl;
+					//并且该有效R与y,b相容
+					if (is_consistent(y, b, *z, r_2_[x.id][a][z->id])) {
+						//cout << "   consistent" << endl;
+						continue;
 					}
-					if (valid[3]) {
-						//并且该有效R与x,a相容
-						cout << "    valid[3]: (" << z->id << "," << r_2_[y.id][b][z->id] << endl;
-						if (is_consistent(x, a, *z, r_2_[y.id][b][z->id])) {
-							cout << "    consistent" << endl;
-
-							continue;
-						}
-						else {
-							cout << "    inconsistent" << endl;
-						}
-
+					else {
+						//cout << "   inconsistent" << endl;
 					}
-					//如果两个都valid那么上一个
+
+
 				}
+				//如果两个都valid那么上一个
+			//}
+			///////////////////////////////////
+
+			//if (valid[2] || valid[3]) {
+				//cout << "    valid[2]: (" << z->id << "," << r_1_[y.id][b][z->id] << endl;
+				if (valid[2]) {
+					//并且该有效R与x,a相容
+					if (is_consistent(x, a, *z, r_1_[y.id][b][z->id])) {
+						//cout << "   consistent" << endl;
+						continue;
+					}
+					else {
+						//cout << "   inconsistent" << endl;
+					}
+
+				}
+				if (valid[3]) {
+					//并且该有效R与x,a相容
+					//cout << "    valid[3]: (" << z->id << "," << r_2_[y.id][b][z->id] << endl;
+					if (is_consistent(x, a, *z, r_2_[y.id][b][z->id])) {
+						//cout << "    consistent" << endl;
+
+						continue;
+					}
+					else {
+						//cout << "    inconsistent" << endl;
+					}
+
+				}
+				//如果两个都valid那么上一个
+			//}
 
 				bool pc_witness = false;
-				cout << "non valid r, seek new pcw" << endl;
+				//cout << "  non valid r, seek new pcw" << endl;
 				for (auto c = z->head(p); c != Limits::INDEX_OVERFLOW; z->next_value(c, p)) {
-					cout << "test: (" << x.id << "," << a << ")-(" << z->id << "," << c << ")-(" << y.id << ", " << b << ")" << endl;
+					//cout << "  test: (" << x.id << "," << a << ")-(" << z->id << "," << c << ")-(" << y.id << ", " << b << ")" << endl;
 					if (is_consistent(x, a, *z, c) && is_consistent(y, b, *z, c)) {
-						cout << "    consistent" << endl;
+						//cout << "    consistent" << endl;
 						pc_witness = true;
 						break;
 					}
 				}
 
 				if (!pc_witness) {
-					cout << "    non consistent need delete" << endl;
+					//cout << "    non consistent need delete" << endl;
 					return false;
 				}
 
