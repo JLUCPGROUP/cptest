@@ -78,6 +78,12 @@
     <ClCompile Include="MAC3_matrix.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="rrpc3_test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="NSAC.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="BMPath.xml">
@@ -96,6 +102,9 @@
     </ClInclude>
     <ClInclude Include="commonlint.h">
       <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="NSAC.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

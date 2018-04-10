@@ -154,10 +154,12 @@
     <ClCompile Include="MAC3_matrix.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="BacktrackingSearch.cpp" />
+    <ClCompile Include="NSAC.cpp" />
     <ClCompile Include="QModel.cpp" />
     <ClCompile Include="RNSAC.cpp" />
     <ClCompile Include="rnsac_test.cpp" />
     <ClCompile Include="RPC3.cpp" />
+    <ClCompile Include="rrpc3_test.cpp" />
     <ClCompile Include="SAC.cpp" />
     <ClCompile Include="STR.cpp" />
     <ClCompile Include="test_lmaxrpc.cpp" />
@@ -172,6 +174,7 @@
     <ClInclude Include="..\includes\BitSearch.h" />
     <ClInclude Include="..\includes\QModel.h" />
     <ClInclude Include="commonlint.h" />
+    <ClInclude Include="NSAC.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

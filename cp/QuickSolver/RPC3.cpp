@@ -113,6 +113,7 @@ namespace cp {
 				const bool valid[] = {
 					vp.y->have(r_1_[vp.x->id][a][vp.y->id], p),
 					vp.y->have(r_2_[vp.x->id][a][vp.y->id], p) };
+				const auto c = neibor_matrix[vp.x->id][vp.y->id][0];
 				//cout << "r1[" << vp.x->id << "," << a << "," << vp.y->id << "] = " << r_1_[vp.x->id][a][vp.y->id] << ":" << valid[0] << endl;
 				//cout << "r2[" << vp.x->id << "," << a << "," << vp.y->id << "] = " << r_2_[vp.x->id][a][vp.y->id] << ":" << valid[1] << endl;
 				//both r valid
@@ -140,6 +141,7 @@ namespace cp {
 
 				if (vp.x->faild(p)) {
 					ps_.state = false;
+					++(con_weight[c->id]);
 					return ps_;
 				}
 
