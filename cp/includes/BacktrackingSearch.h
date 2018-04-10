@@ -234,6 +234,28 @@ namespace cp {
 		vector<int> var_mark_;
 	};
 
+	class NSAC : public BacktrackingSearch {
+	public:
+		NSAC(const HModel& h, const bool backtrackable = true);
+		~NSAC();
+		PropagationState propagate(vector<QVar*>& x_evt, const int p) override;
+		int neibor_ac(QVar& v, const  int p);
+		int ac(vector<QVar*>& x_evt, const int p);
+		inline bool revise(const QTab& c, const QVar& v, const int level);
+		inline bool seek_support(const QTab& c, const QVar& v, const int a, const int p);
+		inline bool is_consistent(const QVar& x, const int a, const QVar& y, const int b);
+		inline bool neibor(const QVar&v, const QTab& c) const;
+		inline bool neibor(const QVar& x, const QVar& y) const;
+
+	protected:
+		u64 * * bitSup_;
+		vars_heap q_nei_;
+		vector<vector<QTab*>> N;
+		vector<vector<vector<vector<int>>>> rel_;
+		arc_que Q;
+		vector<vector<vector<QTab*>>> neibor_cons_;
+	};
+
 	//class STR1 :public BacktrackingSearch {
 	//	STR1(const HModel h, const bool backtrackable = true);
 	//};

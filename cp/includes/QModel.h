@@ -12,6 +12,10 @@ namespace cp {
 		tuple[0] = INT_MAX;
 	}
 
+	class arc;
+	class QVar;
+	class QTab;
+
 	class QVar {
 	public:
 		QVar(HVar* v);
@@ -128,11 +132,35 @@ namespace cp {
 
 	private:
 		vector<QVar*> m_data_;
-		vector<bool> vid_set_;
+		vector<int> vid_set_;
 		size_t max_size_;
 		int m_front_;
 		int m_rear_;
 		int size_;
+	};
+
+	class arc_que {
+	public:
+#define  have(ele) vid_set_[ele.c->id * arity_ + ele.c->index(*ele.v)]
+		//inline bool have(const arc& a);
+		arc_que() {}
+		arc_que(const int cons_size, const int max_arity);
+		virtual ~arc_que();
+
+		void MakeQue(const size_t cons_size, const size_t max_arity);
+		void DeleteQue();
+		bool empty() const;
+		bool full() const;
+		bool push(arc& ele) throw(std::bad_exception);
+		arc pop() throw(std::bad_exception);
+
+	private:
+		arc * m_data_;
+		int* vid_set_;
+		size_t arity_;
+		size_t m_size_;
+		int m_front_;
+		int m_rear_;
 	};
 
 	class vars_heap {
@@ -288,9 +316,10 @@ namespace cp {
 	//	int m_rear_;
 	//	int size_;
 	//};
+
 	class vars_pair_cir_que {
 	public:
-		vars_pair_cir_que(){};
+		vars_pair_cir_que() {};
 		virtual ~vars_pair_cir_que() {};
 
 		bool empty() const;

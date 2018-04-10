@@ -59,6 +59,7 @@ namespace cp {
 		ps_.state = true;
 		return ps_;
 	}
+
 	inline bool MAC3_matrix::revise(const QTab & c, const QVar & v, const int level) {
 		++ss_.num_revisions;
 		const int num_elements = v.size(level);
