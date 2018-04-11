@@ -155,6 +155,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="BacktrackingSearch.cpp" />
     <ClCompile Include="NSAC.cpp" />
+    <ClCompile Include="nsac_test.cpp" />
     <ClCompile Include="QModel.cpp" />
     <ClCompile Include="RNSAC.cpp" />
     <ClCompile Include="rnsac_test.cpp" />

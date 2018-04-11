@@ -141,7 +141,7 @@ namespace cp {
 
 	class arc_que {
 	public:
-#define  have(ele) vid_set_[ele.c->id * arity_ + ele.c->index(*ele.v)]
+#define  have_arc(ele) vid_set_[ele.c->id * arity_ + ele.c->index(*ele.v)]
 		//inline bool have(const arc& a);
 		arc_que() {}
 		arc_que(const int cons_size, const int max_arity);
@@ -209,8 +209,8 @@ namespace cp {
 		QTab * c;
 		QVar * v;
 		arc() :c(nullptr), v(nullptr) {};
-		arc(QTab* c, QVar* v) :c(c), v(v) {}
-		virtual ~arc() {}
+		arc(QTab& c, QVar& v) :c(&c), v(&v) {}
+		virtual ~arc() {};
 	};
 
 	class QConVal {
@@ -221,7 +221,7 @@ namespace cp {
 		QConVal(arc& rc, const int a) :c(rc.c), v(rc.v), a(a) {}
 
 		virtual ~QConVal() {}
-		arc get_arc() const { return arc(c, v); }
+		arc get_arc() const { return arc(*c, *v); }
 		QVal get_vvalue() const { return QVal(v, a); }
 		int get_var_index()const { return c->index(*v); }
 		const QConVal& operator=(const QConVal& rhs);

@@ -380,12 +380,12 @@ namespace cp {
 		if (full())
 			throw std::bad_exception();
 
-		if (have(ele))
+		if (have_arc(ele))
 			return false;
 
 		m_data_[m_rear_] = ele;
 		m_rear_ = (m_rear_ + 1) % m_size_;
-		have(ele) = 1;
+		have_arc(ele) = 1;
 
 		return true;
 	}
@@ -396,7 +396,7 @@ namespace cp {
 
 		arc tmp = m_data_[m_front_];
 		m_front_ = (m_front_ + 1) % m_size_;
-		have(tmp) = 0;
+		have_arc(tmp) = 0;
 
 		return tmp;
 	}

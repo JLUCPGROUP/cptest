@@ -84,6 +84,9 @@
     <ClCompile Include="NSAC.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="nsac_test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="BMPath.xml">
