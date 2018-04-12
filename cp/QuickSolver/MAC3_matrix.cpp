@@ -3,6 +3,7 @@ namespace cp {
 
 	MAC3_matrix::MAC3_matrix(const HModel& h, const bool backtrackable)
 		:BacktrackingSearch(h, backtrackable) {
+		name = "MAC3_matrix";
 
 		rel_.resize(num_vars, vector<vector<vector<int>>>(num_vars, vector<vector<int>>(max_dom_size, vector<int>(max_dom_size, false))));
 		for (QTab* c : tabs) {
@@ -13,6 +14,8 @@ namespace cp {
 				rel_[y][x][t[1]][t[0]] = true;
 			}
 		}
+
+
 	}
 	MAC3_matrix::~MAC3_matrix() {
 

@@ -225,6 +225,7 @@ namespace  cp {
 	SearchStatistics BacktrackingSearch::binary_search(const Heuristic::Var varh, const Heuristic::Val valh, const int time_limits) {
 		Timer t;
 		vector<QVar*> x_evt;
+		//initial_propagate(vars,0);
 		bool consistent_ = propagate(vars, 0).state;
 		x_evt.clear();
 		bool finished_ = false;
@@ -252,6 +253,8 @@ namespace  cp {
 			if (v_a.v->size(top_) != 1 && consistent_) {
 				//++ss_.num_positives;
 				v_a.v->reduce_to(v_a.a, top_);
+
+				//propagate_after_assignment(vars,0);
 				x_evt.push_back(v_a.v);
 				consistent_ = propagate(x_evt, top_).state;
 				x_evt.clear();
@@ -280,6 +283,8 @@ namespace  cp {
 					x_evt.push_back(v_a.v);
 					consistent_ = v_a.v->size(top_) && propagate(x_evt, top_).state;
 					x_evt.clear();
+					//propagate_after_assignment(vars,0);
+
 				}
 			}
 

@@ -1,7 +1,7 @@
-﻿#pragma once
-
-class UVar
-{
-public:
-	
-};
+﻿//#pragma once
+//
+//class UVar
+//{
+//public:
+//	
+//};

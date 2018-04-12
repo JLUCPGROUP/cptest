@@ -2,6 +2,7 @@
 namespace cp {
 	MAC3bit::MAC3bit(const HModel& h, const bool backtrackable) :
 		BacktrackingSearch(h, backtrackable) {
+		name = "MAC3bit";
 		bitSup_ = new u64*[num_cva];
 		for (size_t i = 0; i < num_cva; i++)
 			bitSup_[i] = new u64[max_bitDom_size]();

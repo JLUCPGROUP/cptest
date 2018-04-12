@@ -17,6 +17,7 @@
 //	//MAC3rm s(*m);
 //	//MAC3bit s(*m);
 //	//RNSQ s(*m);
+//	//FC s(*m);
 //	NSAC s(*m);
 //	//MAC3_matrix s(*m);
 //	//AC3withSAC1bitprocessing s(*m);

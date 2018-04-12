@@ -145,12 +145,14 @@
     <ClCompile Include="BitSearch.cpp" />
     <ClCompile Include="CFC.cpp" />
     <ClCompile Include="FC.cpp" />
+    <ClCompile Include="fc_test.cpp" />
     <ClCompile Include="lMaxRPC_bit_rm.cpp" />
     <ClCompile Include="MAC3.cpp" />
     <ClCompile Include="MAC3bit.cpp" />
     <ClCompile Include="mac3bit_kway_test.cpp" />
     <ClCompile Include="mac3bit_test.cpp" />
     <ClCompile Include="MAC3rm.cpp" />
+    <ClCompile Include="mac3rm_test.cpp" />
     <ClCompile Include="MAC3_matrix.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="BacktrackingSearch.cpp" />

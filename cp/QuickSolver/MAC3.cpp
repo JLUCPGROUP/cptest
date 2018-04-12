@@ -3,7 +3,7 @@ namespace cp {
 
 	MAC3::MAC3(const HModel& h, const bool backtrackable)
 		:BacktrackingSearch(h, backtrackable) {
-
+		name = "AC3";
 	}
 	MAC3::~MAC3() {
 

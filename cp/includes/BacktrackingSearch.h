@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "QModel.h"
+#include <deque>
 namespace cp {
 	class BacktrackingSearch {
 	public:
@@ -67,6 +68,7 @@ namespace cp {
 		int tmp_;
 		bool backtrackable_ = false;
 		vector<int> solution_;
+		string name;
 	};
 
 	//class MAC3 :public BacktrackingSearch {
@@ -242,6 +244,10 @@ namespace cp {
 		int neibor_ac(QVar& v, const  int p);
 		int ac(vector<QVar*>& x_evt, const int p);
 		int ac(vars_heap& x_evt, const int p);
+		int ac(deque<QVar*>& x_evt, const int p);
+
+		inline bool revise(const QVar& y, const QTab& c, const QVar& v, const int level);
+		inline bool seek_support(const QVar& y, const QTab& c, const QVar& v, const int a, const int p) const;
 
 		inline bool revise(const QTab& c, const QVar& v, const int level);
 		inline bool seek_support(const QTab& c, const QVar& v, const int a, const int p);
@@ -257,6 +263,19 @@ namespace cp {
 		arc_que Q;
 		//vars_cir_que q_var;
 		vector<vector<vector<QTab*>>> neibor_cons_;
+		deque<QVar*> dq;
+	};
+
+	class FC :public BacktrackingSearch {
+	public:
+		FC(const HModel& h, const bool backtrackable = true);
+		~FC();
+		bool seek_support(const QTab& c, const QVar& x, int, int);
+		bool is_consistent(const QVar& x, int, const QVar& y, int);
+		bool revise(const QTab& c, const QVar& x, const int p);
+		PropagationState propagate(vector<QVar*>& x_evt, const int p) override;
+	protected:
+		vector<vector<vector<vector<int>>>> rel_;
 	};
 
 	//class STR1 :public BacktrackingSearch {

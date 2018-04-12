@@ -54,9 +54,6 @@
     <ClCompile Include="CFC.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="FC.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="STR.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -85,6 +82,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="nsac_test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="FC.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="fc_test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="mac3rm_test.cpp">
       <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
