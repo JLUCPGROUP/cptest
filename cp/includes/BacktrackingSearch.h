@@ -127,6 +127,22 @@ namespace cp {
 		//u64 num_res_ = 0;
 	};
 
+	class MAC3rmm :public BacktrackingSearch {
+	public:
+		MAC3rmm(const HModel& h, const bool backtrackable = true);
+		virtual ~MAC3rmm();
+		inline PropagationState propagate(vector<QVar*>& x_evt, const int level) override;
+		inline bool revise(const QTab& c, const QVar& v, const int level);
+		inline bool seek_support(const QVar& y, const QTab& c, const QVar& x, const int a, const int p);
+		inline bool seek_support(const QTab& c, const QVar& v, const int a, const int p);
+		bool is_consistent(const QVar& x, int, const QVar& y, int);
+	protected:
+		vector<int> res_;
+		vector<vector<vector<vector<int>>>> rel_;
+		//int** res_;
+		//u64 num_res_ = 0;
+	};
+
 	class lMaxRPC_bit_rm :public BacktrackingSearch {
 	public:
 		lMaxRPC_bit_rm(const HModel& h, const bool backtrackable = true);

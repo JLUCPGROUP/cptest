@@ -154,6 +154,7 @@
     <ClCompile Include="MAC3rm.cpp" />
     <ClCompile Include="mac3rm_test.cpp" />
     <ClCompile Include="MAC3_matrix.cpp" />
+    <ClCompile Include="MAC3_rm_matrix.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="BacktrackingSearch.cpp" />
     <ClCompile Include="NSAC.cpp" />

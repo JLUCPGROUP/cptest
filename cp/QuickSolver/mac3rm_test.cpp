@@ -48,7 +48,7 @@ int main(const int argc, char ** argv) {
 		XBuilder builder(f, XRT_BM);
 		HModel* m = new HModel();
 		builder.GenerateHModel(m);
-		MAC3rm s(*m);
+		MAC3rmm s(*m);
 		s.binary_search(ss.vrh, Heuristic::VLH_MIN, TimeLimit);
 		const bool test = s.solution_check();
 #ifdef LOGFILE

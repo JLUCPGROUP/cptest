@@ -42,8 +42,6 @@ namespace cp {
 		delete[] bitSup_;
 	}
 
-
-
 	PropagationState RNSQ::propagate(vector<QVar*>& x_evt, const int p) {
 		q_.clear();
 
@@ -53,10 +51,12 @@ namespace cp {
 		if (p == 0)
 			for (auto v : x_evt)
 				q_.push(*v, 0);
-		else
-			for (auto v : neighborhood[x_evt[0]->id])
+		else {
+			const auto x = x_evt[0];
+			for (auto v : neighborhood[x->id])
 				if (!I.assigned(*v))
 					q_.push(*v, p);
+		}
 
 
 		while (!q_.empty()) {
@@ -73,9 +73,9 @@ namespace cp {
 					x->remove_value(a, p);
 					deletion = true;
 				}
-				else if (res == 1) {
-					//neibor_ac(*x, tmp_);
-				}
+				//else if (res == 1) {
+				//	//neibor_ac(*x, tmp_);
+				//}
 
 				if (x->faild(p)) {
 					ps_.state = false;
@@ -84,6 +84,7 @@ namespace cp {
 
 				a = x->next(a, p);
 			}
+
 			if (deletion) {
 				for (auto v : neighborhood[x->id])
 					if (!I.assigned(*v))
@@ -225,7 +226,9 @@ namespace cp {
 			QVar* x = c->scope[0];
 			QVar* y = c->scope[1];
 
-			if (var_mark_[x->id] == 1) {
+			if (var_mark_[x->id] == 1 && !I.assigned(*y)) {
+			//if (!I.assigned(*y)) {
+
 				revise(*c, *y, p);
 				if (y->faild(p)) {
 					return 0;
@@ -233,9 +236,13 @@ namespace cp {
 				else if (y->size(p) == 1) {
 					res = 1;
 				}
+				//var_mark_[x->id] = 0;
+			//}
 			}
 
-			if (var_mark_[y->id] == 1) {
+			if (var_mark_[y->id] == 1 && !I.assigned(*x)) {
+			//if (!I.assigned(*x)) {
+
 				revise(*c, *x, p);
 				if (x->faild(p)) {
 					return 0;
@@ -243,6 +250,8 @@ namespace cp {
 				else if (x->size(p) == 1) {
 					res = 1;
 				}
+				//var_mark_[y->id] = 0;
+			//}
 			}
 		}
 

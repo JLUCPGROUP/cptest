@@ -33,7 +33,7 @@
 //	auto tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 //#ifdef LOGFILE
 //	ofstream lofi;
-//	const string bm_res = X_PATH + "res2\\rnsac\\" + ss.vrh_str + "\\" + argv[1] + "-" + std::to_string(tt) + ".csv";
+//	const string bm_res = X_PATH + "res2\\ns1pac\\" + ss.vrh_str + "\\" + argv[1] + "-" + std::to_string(tt) + ".csv";
 //	lofi.open(bm_res, ios::out | ios::trunc);
 //	cout << bm_res << endl;
 //	if (!lofi.is_open())

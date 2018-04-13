@@ -13,19 +13,20 @@
 //	XBuilder builder(X_PATH, XRT_BM_PATH);
 //	HModel* m = new HModel();
 //	builder.GenerateHModel(m);
-//	//MAC3 s(*hm);
+//	//MAC3 s(*m);
+//	//MAC3rmm s(*m);
 //	//MAC3rm s(*m);
-//	//MAC3bit s(*m);
+//	MAC3bit s(*m);
 //	//RNSQ s(*m);
 //	//FC s(*m);
-//	NSAC s(*m);
+//	//RPC3 s(*m);
 //	//MAC3_matrix s(*m);
 //	//AC3withSAC1bitprocessing s(*m);
 //
 //	//lMaxRPC_bit_rm s(*m);
 //	//s.propagate(s.vars, 0);
 //	//s.binary_search(Heuristic::Var::VRH_DOM_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
-//	s.binary_search(Heuristic::Var::VRH_DOM_DDEG_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
+//	s.binary_search(Heuristic::Var::VRH_DOM_WDEG_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
 //
 //	//s.binary_search(Heuristic::Var::VRH_DOM_MIN, Heuristic::Val::VLH_MIN, TimeLimit);
 //	cout << builder.file_name() << endl;

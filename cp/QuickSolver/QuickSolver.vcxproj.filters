@@ -93,6 +93,9 @@
     <ClCompile Include="mac3rm_test.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="MAC3_rm_matrix.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="BMPath.xml">
