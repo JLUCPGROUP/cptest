@@ -139,12 +139,10 @@
   <ItemGroup>
     <ClInclude Include="UModel.h" />
     <ClInclude Include="USolver.h" />
-    <ClInclude Include="UVar.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="UModel.cpp" />
     <ClCompile Include="USolver.cpp" />
-    <ClCompile Include="UVar.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

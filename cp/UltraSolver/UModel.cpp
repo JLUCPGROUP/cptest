@@ -3,12 +3,21 @@
 
 namespace cp {
 
-	UVar::UVar(HVar* v) :
-		id(v->id),
-		capacity(v->vals.size()),
-		limit(capacity & MOD_MASK),
-		num_bit(ceil(float(capacity) / BITSIZE)) {
+	UVar::UVar(const HVar& v) :
+		id(v.id),
+		capacity(v.vals.size()), limit(capacity & MOD_MASK),
+		num_bit(ceil(float(capacity) / BITSIZE)),
+		size_(v.vals.size()),
+		mark_(0) {
 
+		dom_.resize(size_);
+		map_.resize(size_);
+		for (int i = 0; i < capacity; ++i) {
+			dom_[i] = i;
+			map_[i] = i;
+		}
+
+		
 	}
 
 

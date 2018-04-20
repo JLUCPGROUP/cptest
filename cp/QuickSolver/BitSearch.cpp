@@ -202,9 +202,9 @@ namespace cp {
 				if (i != j) {
 					// 变量i与j不相同
 					if (constraint_matrix[i][j] != -1) {
-						//有直接约束关系
-						wdeg[i][j] = 1;
-						wdeg[j][i] = 1;
+						////有直接约束关系
+						//wdeg[i][j] = 1;
+						//wdeg[j][i] = 1;
 					}
 					else {
 						//无约束关系，都置为1
@@ -307,24 +307,24 @@ namespace cp {
 		}
 
 
-		//////全论域上wdeg都是1
-		//for (int i = 0; i < num_vars; ++i) {
-		//	for (int j = 0; j < num_vars; ++j) {
-		//		//if (i != j) {
-		//			wdeg[i][j] = 1;
-		//			wdeg[j][i] = 1;
-		//		//}
-		//	}
-		//}
-
-		//邻域上wdeg是1
-		for (int i = 0; i < num_vars; i++) {
+		////全论域上wdeg都是1
+		for (int i = 0; i < num_vars; ++i) {
 			for (int j = 0; j < num_vars; ++j) {
-				if (constraint_matrix[i][j] != -1) {
+				//if (i != j) {
 					wdeg[i][j] = 1;
-				}
+					wdeg[j][i] = 1;
+				//}
 			}
 		}
+
+		////邻域上wdeg是1
+		//for (int i = 0; i < num_vars; i++) {
+		//	for (int j = 0; j < num_vars; ++j) {
+		//		if (constraint_matrix[i][j] != -1) {
+		//			wdeg[i][j] = 1;
+		//		}
+		//	}
+		//}
 
 
 

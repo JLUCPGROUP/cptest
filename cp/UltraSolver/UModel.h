@@ -13,6 +13,15 @@ namespace cp {
   b = a ^ b;        \
   a = a ^ b;}    
 
+	class UVar;
+	class UTab;
+	class UVal;
+	class UTuple;
+	class UTupleSet;
+	struct SearchStatistics;
+	struct SearchScheme;
+
+
 	class UTuple {
 	public:
 		UTuple(const vector<int> &t);
@@ -21,6 +30,16 @@ namespace cp {
 		int *t_;
 		int arity_;
 		int max_arity_;
+	};
+
+	struct SearchScheme {
+		Heuristic::Var vrh;
+		Heuristic::Var vlh;
+		Heuristic::DecisionScheme ds;
+
+		string vrh_str;
+		string vlh_str;
+		string ds_str;
 	};
 
 	class UTupleSet {
@@ -33,9 +52,26 @@ namespace cp {
 		int max_arity_;
 	};
 
+	struct SearchStatistics {
+		u64 num_sol = 0;
+		u64 num_positives = 0;
+		u64 num_negatives = 0;
+		u64 nodes = 0;
+		u64 initial_propagate_time = 0;
+		u64 build_time = 0;
+		u64 search_time = 0;
+		u64 total_time = 0;
+		u64 solve_time = 0;
+		bool pass;
+		bool time_out = false;
+		bool sat_initial = true;
+		u64 num_revisions = 0;
+	};
+
+
 	class UVar {
 	public:
-		UVar(HVar *v);
+		UVar(const HVar& v);
 		void remove_value(const int a);
 		//bind
 		void reduece_to(const int a);
