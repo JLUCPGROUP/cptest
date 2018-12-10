@@ -154,6 +154,17 @@ void HTab::Show() {
 	}
 	cout << endl;
 }
+
+void HTab::ShowX3() {
+	const string sem = semantics ? "supports" : "conflicts";
+	cout << "<extension>" << endl;
+	cout << "<list> x[" << scope[0]->id << "] x[" << scope[1]->id << "] </list>" << endl;
+	cout << "<" << sem << ">";
+	for (auto t : tuples)
+		cout << "(" << t[0] << "," << t[1] << ")";
+	cout << "</" << sem << ">" << endl;
+	cout << "</extension>" << endl;
+}
 ////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////
@@ -271,6 +282,11 @@ void HModel::show() {
 		t->Show();
 }
 
+void HModel::showX3() {
+	for (auto t : tabs)
+		t->ShowX3();
+}
+
 int HModel::regist(const string exp_name, function<int(std::vector<int>&)> exp) {
 	const int id = generate_exp_uid();
 	if (Funcs::str_expr_map.find(exp_name) != Funcs::str_expr_map.end()) {
@@ -336,7 +352,6 @@ vector<HTab*> HModel::solution_check(vector<int>& sol) {
 
 	return conflict_constraints;
 }
-
 
 void HModel::get_postfix(const string expr, vector<int>& data, vector<int>& params, vector<int>& num_op_params, vector<HVar*>& scp) {
 	//转换表达式
@@ -563,7 +578,7 @@ void HModel::GetORITuple(vector<int>& std_tuple, vector<int>& ori_tuple, vector<
 void HModel::get_ori_tuple_by_index(int idx, std::vector<int>& t, const vector<HVar*> scp) {
 	for (int i = scp.size() - 1; i >= 0; --i) {
 		const int size = scp[i]->vals.size();
-		t[i] = idx%size;
+		t[i] = idx % size;
 		idx /= size;
 	}
 }

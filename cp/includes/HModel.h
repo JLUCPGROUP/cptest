@@ -167,6 +167,7 @@ public:
 	bool SAT(vector<int>& t);
 	bool SAT_STD(vector<int>& t);
 	void Show();
+	void ShowX3();
 	void GetTuple(int idx, vector<int>& src_t, vector<int>& std_t);
 	bool sat(vector<int>& t);
 private:
@@ -196,6 +197,7 @@ public:
 	int max_domain_size() const { return mds_; }
 	int max_arity() const { return mas_; };
 	void show();
+	void showX3();
 	int regist(string exp_name, function<int(vector<int>&)>);
 	static int calculate(vector<int> & expr, vector<int>& params_len);
 	vector<HTab*> solution_check(vector<int>& sol);
