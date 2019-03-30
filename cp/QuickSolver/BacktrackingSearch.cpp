@@ -243,7 +243,7 @@ SearchStatistics BacktrackingSearch::binary_search(const Heuristic::Var varh, co
 
 		QVal v_a = select_QVal(varh, valh, top_);
 		//cout << "---------------------------" << endl;
-		cout << "push: " << v_a << endl;
+		//cout << "push: " << v_a << endl;
 		//cout << "---------------------------" << endl;
 		top_ = new_level();
 		I.push(v_a);
@@ -273,7 +273,7 @@ SearchStatistics BacktrackingSearch::binary_search(const Heuristic::Var varh, co
 		while (!consistent_ && !I.empty()) {
 			v_a = I.pop();
 			//cout << "---------------------------" << endl;
-			cout << "pop:  " << v_a << endl;
+			//cout << "pop:  " << v_a << endl;
 			//cout << "---------------------------" << endl;
 			top_ = back_level();
 			//选出的变量论域大小不为1

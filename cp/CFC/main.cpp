@@ -6,6 +6,8 @@
 #include <ctime>
 #include <random>
 #include "../includes/Timer.h"
+//#include <intrin.h>
+#include <future>
 using namespace std;
 typedef unsigned long long u64;
 int f1(u64 num);
@@ -162,12 +164,30 @@ int f5(u64 num) {
 //	return ((uCount + (uCount >> 3)) & 1070707070707070707070) % 63;
 //}
 
+int f6(u64 num) {
+	return __popcnt64(num);
+}
+
+
+int f7(u64 i) {
+	i = i - ((i >> 1) & 0x5555555555555555L);
+	i = (i & 0x3333333333333333L) + ((i >> 2) & 0x3333333333333333L);
+	i = (i + (i >> 4)) & 0x0f0f0f0f0f0f0f0fL;
+	i = i + (i >> 8);
+	i = i + (i >> 16);
+	i = i + (i >> 32);
+	return i & 0x7f;
+}
+
+int f8(u64 num) {
+	return _mm_popcnt_u64(num);
+}
 
 void correctness_test() {
 	u64 test_data[] = { 0, 1, 2, 3, 0x01234567, 0x0809a0b0c0d00e0f, 0xf0f0f0f0f0f0f0f0 };
 	u64 corect_result[] = { 0, 1, 1, 2, 12, 20, 32 };
 
-	int(*fn[])(u64) = { f1, f2, f3, f4, f5 };
+	int(*fn[])(u64) = { f1, f2, f3, f4, f5, f6, f7 ,f8 };
 	for (int i = 0; i < sizeof(fn) / sizeof(*fn); ++i) {
 		for (int j = 0; j < sizeof(test_data) / sizeof(*test_data); ++j) {
 			if (fn[i](test_data[j]) != corect_result[j]) {
@@ -185,7 +205,7 @@ void performance_test() {
 	cp::Timer t;
 	prepare_test_data(test_data, TEST_DATA_SIZE);
 	cout << t.elapsed() << endl;
-	int(*fn[])(u64) = { f1, f2, f3,f4, f5};
+	int(*fn[])(u64) = { f1, f2, f3,f4, f5, f6, f7,f8 };
 
 	for (int i = 0; i < sizeof(fn) / sizeof(*fn); ++i) {
 		clock_t start = clock();

@@ -19,9 +19,9 @@ int test() {
 	//MAC3rm s(*m);
 	//MAC3bit s(*m);
 	//RNSQ s(*m);
-	//FC s(*m);
+	FC s(*m);
 	//RPC3 s(*m);
-	MAC3_matrix s(*m);
+	//MAC3_matrix s(*m);
 	//AC3withSAC1bitprocessing s(*m);
 
 	//lMaxRPC_bit_rm s(*m);
